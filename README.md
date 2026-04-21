@@ -1,4 +1,4 @@
 # WHCSCTF
-Warren Hills Computer Science Advanced Topics \n
-Warren Hills Cyber Stars Capture The Flag \n
-Created by Alexander Kokinos and Dylan Fratella \n
+Warren Hills Computer Science Advanced Topics 
+Warren Hills Cyber Stars Capture The Flag 
+Created by Alexander Kokinos and Dylan Fratella 
