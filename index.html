@@ -15,7 +15,6 @@
     --accent:#2d6a4f;--accent-l:#e8f4ee;--accent-d:#52b788;
     --solved:#d8f3dc;--solved-b:#74c69d;--solved-t:#1b4332;
     --danger:#e63946;
-    --edit:#5c5bd4;--edit-l:#eeeefc;--edit-b:#a5a4e8;
     --sh-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
     --sh-md:0 4px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
     --sh-lg:0 20px 60px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
@@ -29,12 +28,6 @@
   .logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
   .logo svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .site-title{font-size:.95rem;font-weight:600;letter-spacing:-.01em}
-  .h-right{display:flex;align-items:center;gap:.75rem}
-
-  .edit-toggle{font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;border:1px solid var(--border);background:var(--surface);border-radius:100px;padding:.3rem .9rem;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:.4rem;transition:all .15s}
-  .edit-toggle:hover,.edit-toggle.active{border-color:var(--edit-b);color:var(--edit);background:var(--edit-l)}
-  .edit-toggle svg{width:13px;height:13px;flex-shrink:0}
-
   .score-pill{display:flex;align-items:center;gap:.5rem;background:var(--accent-l);border:1px solid var(--solved-b);border-radius:100px;padding:.35rem 1rem}
   .score-label{font-size:.75rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
   .score-value{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
@@ -42,23 +35,19 @@
 
   /* MAIN */
   main{padding:2rem;max-width:1600px;margin:0 auto}
-
   .cat-section{margin-bottom:2.5rem}
   .cat-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1rem}
   .cat-name{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
   .cat-line{flex:1;height:1px;background:var(--border)}
   .cat-count{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-3)}
-
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.625rem}
 
   /* CARD */
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong);transition:background .2s}
-  .card:hover:not(.solved):not(.no-hover){border-color:var(--border-strong);box-shadow:var(--sh-md);transform:translateY(-1px)}
+  .card:hover:not(.solved){border-color:var(--border-strong);box-shadow:var(--sh-md);transform:translateY(-1px)}
   .card.solved{background:var(--solved);border-color:var(--solved-b);cursor:default}
   .card.solved::before{background:var(--accent-d)}
-  .card.no-hover{cursor:default}
-  .card.no-hover:hover{transform:none;box-shadow:var(--sh-sm)}
   .card-name{font-size:.825rem;font-weight:500;color:var(--text);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card.solved .card-name{color:var(--solved-t)}
   .card-pts{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text-3)}
@@ -66,14 +55,7 @@
   .solved-icon{position:absolute;top:.5rem;right:.5rem;width:16px;height:16px;opacity:0;transition:opacity .3s}
   .card.solved .solved-icon{opacity:1}
 
-  .card-edit-btn{position:absolute;bottom:.5rem;right:.5rem;width:22px;height:22px;background:var(--edit-l);border:1px solid var(--edit-b);border-radius:5px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--edit);transition:background .15s;z-index:2}
-  .card-edit-btn:hover{background:var(--edit-b)}
-  .card-edit-btn svg{width:11px;height:11px}
-  body.edit-mode .card-edit-btn{display:flex}
-  body.edit-mode .card:not(.solved){cursor:default}
-  body.edit-mode .card:not(.solved):hover{transform:none;box-shadow:var(--sh-sm)}
-
-  /* MODAL SHARED */
+  /* MODAL */
   .overlay{position:fixed;inset:0;z-index:100;background:rgba(20,18,16,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
   .overlay.open{opacity:1;pointer-events:all}
   .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-lg);width:100%;max-width:480px;padding:2rem;transform:translateY(12px) scale(.98);transition:transform .25s cubic-bezier(.34,1.3,.64,1);position:relative}
@@ -102,27 +84,6 @@
   .solved-banner{display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:500;color:var(--accent);background:var(--solved);border:1px solid var(--solved-b);border-radius:var(--r);padding:.75rem 1rem;margin-top:.75rem}
   .solved-banner svg{width:16px;height:16px;flex-shrink:0}
 
-  /* EDIT MODAL */
-  #editOverlay .modal{max-width:520px;border-top:3px solid var(--edit)}
-  .e-title{font-size:1rem;font-weight:600;color:var(--edit);margin-bottom:.2rem}
-  .e-sub{font-size:.78rem;color:var(--text-3);margin-bottom:1.25rem}
-  .e-hr{height:1px;background:var(--border);margin-bottom:1.25rem}
-  .fg{margin-bottom:1rem}
-  .fg label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:.4rem}
-  .fi{width:100%;font-family:'DM Sans',sans-serif;font-size:.875rem;border:1px solid var(--border);border-radius:var(--rs);padding:.55rem .875rem;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
-  .fi:focus{border-color:var(--edit-b);box-shadow:0 0 0 3px rgba(92,91,212,.12)}
-  .fi.mono{font-family:'DM Mono',monospace;font-size:.82rem}
-  textarea.fi{resize:vertical;min-height:80px;line-height:1.55}
-  .fi-note{font-size:.7rem;color:var(--text-3);margin-top:.3rem}
-  .fi-note strong{color:var(--edit)}
-  .hash-box{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--text-3);background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:.4rem .6rem;margin-top:.4rem;word-break:break-all}
-  .e-foot{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
-  .btn-cancel{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:transparent;color:var(--text-2);border:1px solid var(--border);border-radius:var(--rs);padding:.55rem 1rem;cursor:pointer;transition:background .15s}
-  .btn-cancel:hover{background:var(--bg)}
-  .btn-save{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:var(--edit);color:#fff;border:none;border-radius:var(--rs);padding:.55rem 1.1rem;cursor:pointer;transition:background .15s,transform .1s}
-  .btn-save:hover{background:#4a49b0}
-  .btn-save:active{transform:scale(.97)}
-
   /* TOAST */
   .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:.82rem;font-weight:500;padding:.6rem 1.2rem;border-radius:100px;z-index:200;opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.34,1.4,.64,1);pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -141,10 +102,6 @@
     <span class="site-title">WHCS Challenge Board</span>
   </div>
   <div class="h-right">
-    <button class="edit-toggle" id="editToggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      <span id="editLabel">Edit Mode</span>
-    </button>
     <div class="score-pill">
       <span class="score-label">Score</span>
       <span class="score-value" id="totalScore">0</span>
@@ -184,145 +141,285 @@
   </div>
 </div>
 
-<!-- EDIT MODAL -->
-<div class="overlay" id="editOverlay">
-  <div class="modal">
-    <button class="m-close" id="editClose">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="e-title">Edit Challenge</div>
-    <div class="e-sub" id="editSub"></div>
-    <div class="e-hr"></div>
-
-    <div class="fg">
-      <label>Challenge Name</label>
-      <input class="fi" id="eName" type="text" placeholder="e.g. Cookie Monster">
-    </div>
-    <div class="fg">
-      <label>Point Value</label>
-      <input class="fi mono" id="ePts" type="number" min="0" placeholder="100">
-    </div>
-    <div style="display:flex;gap:.75rem">
-      <div class="fg" style="flex:1">
-        <label>Tag 1</label>
-        <input class="fi" id="eTag1" type="text" placeholder="DF">
-      </div>
-      <div class="fg" style="flex:1">
-        <label>Tag 2</label>
-        <input class="fi" id="eTag2" type="text" placeholder="AK">
-      </div>
-    </div>
-    <div class="fg">
-      <label>Description</label>
-      <textarea class="fi" id="eDesc" placeholder="Challenge description…"></textarea>
-    </div>
-    <div class="fg">
-      <label>Answer / Flag</label>
-      <input class="fi mono" id="eAns" type="text" placeholder="WHCS{your_flag_here}" autocomplete="off" spellcheck="false">
-      <div class="fi-note">Answer is <strong>hashed (SHA-256) before saving</strong> — plaintext is never stored on the page.</div>
-      <div class="hash-box" id="hashBox">Enter a flag above to preview its hash…</div>
-    </div>
-
-    <div class="e-foot">
-      <button class="btn-cancel" id="eCancelBtn">Cancel</button>
-      <button class="btn-save" id="eSaveBtn">Save Challenge</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   SHA-256 via Web Crypto API
-   Answers are ONLY ever stored as hashes. Plaintext is a
-   local variable that disappears after the hash is made.
-   ═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   SHA-256 helper — answers are ONLY ever stored as hashes.
+   Plaintext is a local variable that disappears after hashing.
+   ════════════════════════════════════════════════════════════════ */
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-/* ═══════════════════════════════════════════════════════
-   DATA
-   ═══════════════════════════════════════════════════════ */
-const CATEGORIES = [
-  'Web Exploitation',
-  'Cryptography',
-  'Reverse Engineering',
-  'Forensics',
-  'Binary Exploitation',
-  'OSINT',
-  'Miscellaneous',
-];
-const PER_CAT = 20;
+/* ════════════════════════════════════════════════════════════════
+   CHALLENGE DATA  ← EDIT YOUR CHALLENGES HERE
+   ────────────────────────────────────────────────────────────────
+   Each challenge object has these fields:
+     name        — display name on card and in the modal
+     points      — integer point value
+     tag1        — first metadata chip in the modal (e.g. difficulty)
+     tag2        — second metadata chip in the modal (e.g. author)
+     description — challenge prompt text shown in the modal
+     answer      — PLAINTEXT flag (hashed on load, never stored after)
 
+   To add/remove categories: add/remove keys in this object.
+   To add/remove challenges per category: add/remove items in the array.
+   ════════════════════════════════════════════════════════════════ */
+const CHALLENGE_DATA = {
+  'Web Exploitation': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'Cryptography': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'Reverse Engineering': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'Forensics': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'Binary Exploitation': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'OSINT': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+  'Miscellaneous': [
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+    { name:'temp', points:100, tag1:'DF', tag2:'AK', description:'blank', answer:'WHCS{123}' },
+  ],
+};
+
+/* ════════════════════════════════════════════════════════════════
+   RUNTIME STATE
+   ════════════════════════════════════════════════════════════════ */
 const challenges = {};
-CATEGORIES.forEach(cat => {
-  challenges[cat] = Array.from({ length: PER_CAT }, (_, i) => ({
-    id: `${cat}|${i}`,
-    name: 'temp',
-    points: 100,
-    tag1: 'DF',
-    tag2: 'AK',
-    description: 'blank',
-    answerHash: '', // ← SHA-256 hash only; plaintext never lives here
-    solved: false,
-  }));
-});
-
-// Hash the default answer and assign it to all cards on load
-(async () => {
-  const h = await sha256('WHCS{123}');
-  CATEGORIES.forEach(cat => challenges[cat].forEach(ch => ch.answerHash = h));
-})();
-
-/* ═══════════════════════════════════════════════════════
-   STATE
-   ═══════════════════════════════════════════════════════ */
 let score = 0;
-let editMode = false;
-let activePlay = null;   // { ch, cat }
-let activeEdit = null;   // { ch, cat }
+let activePlay = null;
 
-/* ═══════════════════════════════════════════════════════
-   BOARD
-   ═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   LOCALSTORAGE PERSISTENCE
+   whcs_score  — saved integer score
+   whcs_solved — JSON array of "category|index" strings
+   ════════════════════════════════════════════════════════════════ */
+function saveProgress() {
+  const solvedIds = [];
+  Object.keys(challenges).forEach(cat => {
+    challenges[cat].forEach((ch, i) => {
+      if (ch.solved) solvedIds.push(`${cat}|${i}`);
+    });
+  });
+  localStorage.setItem('whcs_score', score);
+  localStorage.setItem('whcs_solved', JSON.stringify(solvedIds));
+}
+
+function loadProgress() {
+  const savedScore  = localStorage.getItem('whcs_score');
+  const savedSolved = localStorage.getItem('whcs_solved');
+  if (savedScore !== null) score = parseInt(savedScore) || 0;
+  if (savedSolved) {
+    try {
+      const ids = JSON.parse(savedSolved);
+      ids.forEach(id => {
+        const sep = id.lastIndexOf('|');
+        const cat = id.slice(0, sep);
+        const idx = parseInt(id.slice(sep + 1));
+        if (challenges[cat] && challenges[cat][idx]) {
+          challenges[cat][idx].solved = true;
+        }
+      });
+    } catch(e) {}
+  }
+  document.getElementById('totalScore').textContent = score;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INIT — hash all answers, build runtime state, load saves, render
+   ════════════════════════════════════════════════════════════════ */
+async function init() {
+  for (const cat of Object.keys(CHALLENGE_DATA)) {
+    challenges[cat] = [];
+    for (let i = 0; i < CHALLENGE_DATA[cat].length; i++) {
+      const src = CHALLENGE_DATA[cat][i];
+      const hash = await sha256(src.answer);
+      // src.answer (plaintext) is a local variable; it leaves scope here.
+      challenges[cat].push({
+        name:        src.name,
+        points:      src.points,
+        tag1:        src.tag1,
+        tag2:        src.tag2,
+        description: src.description,
+        answerHash:  hash,
+        solved:      false,
+      });
+    }
+  }
+  loadProgress();
+  renderBoard();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOARD RENDER
+   ════════════════════════════════════════════════════════════════ */
 function renderBoard() {
   const main = document.getElementById('boardMain');
   main.innerHTML = '';
-  CATEGORIES.forEach(cat => {
+  Object.keys(challenges).forEach(cat => {
     const sec = document.createElement('section');
     sec.className = 'cat-section';
     const solved = challenges[cat].filter(c => c.solved).length;
+    const total  = challenges[cat].length;
     sec.innerHTML = `<div class="cat-header">
       <span class="cat-name">${cat}</span>
       <div class="cat-line"></div>
-      <span class="cat-count">${solved}/${PER_CAT}</span>
+      <span class="cat-count">${solved}/${total}</span>
     </div>`;
     const grid = document.createElement('div');
     grid.className = 'grid';
     challenges[cat].forEach(ch => {
       const card = document.createElement('div');
-      card.className = 'card' + (ch.solved ? ' solved' : '') + (editMode ? ' no-hover' : '');
+      card.className = 'card' + (ch.solved ? ' solved' : '');
       card.innerHTML = `
         <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <div class="card-name">${ch.name}</div>
-        <div class="card-pts">${ch.points} pts</div>
-        <button class="card-edit-btn" title="Edit this challenge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>`;
-
-      card.querySelector('.card-edit-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        openEdit(ch, cat);
-      });
-
-      card.addEventListener('click', () => {
-        if (editMode || ch.solved) return;
-        openPlay(ch, cat);
-      });
-
+        <div class="card-pts">${ch.points} pts</div>`;
+      if (!ch.solved) {
+        card.addEventListener('click', () => openPlay(ch, cat));
+      }
       grid.appendChild(card);
     });
     sec.appendChild(grid);
@@ -330,23 +427,23 @@ function renderBoard() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════
    PLAY MODAL
-   ═══════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════════ */
 function openPlay(ch, cat) {
   activePlay = { ch, cat };
-  document.getElementById('mCat').textContent = cat;
-  document.getElementById('mTitle').textContent = ch.name;
-  document.getElementById('mPts').textContent = `${ch.points} points`;
-  document.getElementById('mTag1').textContent = ch.tag1 || 'DF';
-  document.getElementById('mTag2').textContent = ch.tag2 || 'AK';
-  document.getElementById('mDesc').textContent = ch.description;
-  document.getElementById('ansInput').value = '';
-  document.getElementById('fb').textContent = '';
-  document.getElementById('fb').className = 'fb';
+  document.getElementById('mCat').textContent       = cat;
+  document.getElementById('mTitle').textContent     = ch.name;
+  document.getElementById('mPts').textContent       = `${ch.points} points`;
+  document.getElementById('mTag1').textContent      = ch.tag1 || 'DF';
+  document.getElementById('mTag2').textContent      = ch.tag2 || 'AK';
+  document.getElementById('mDesc').textContent      = ch.description;
+  document.getElementById('ansInput').value         = '';
+  document.getElementById('fb').textContent         = '';
+  document.getElementById('fb').className           = 'fb';
   document.getElementById('ansInput').classList.remove('err');
-  document.getElementById('ansSection').style.display = ch.solved ? 'none' : 'block';
-  document.getElementById('solvedBanner').style.display = ch.solved ? 'flex' : 'none';
+  document.getElementById('ansSection').style.display   = ch.solved ? 'none' : 'block';
+  document.getElementById('solvedBanner').style.display = ch.solved ? 'flex'  : 'none';
   document.getElementById('playOverlay').classList.add('open');
   if (!ch.solved) setTimeout(() => document.getElementById('ansInput').focus(), 250);
 }
@@ -361,19 +458,21 @@ document.getElementById('playOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('playOverlay')) closePlay();
 });
 
-/* SUBMIT — hash the input, compare to stored hash */
+/* ════════════════════════════════════════════════════════════════
+   SUBMIT — hash the input, compare to stored hash
+   ════════════════════════════════════════════════════════════════ */
 document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
   const { ch } = activePlay;
   const raw = document.getElementById('ansInput').value.trim();
-  const fb = document.getElementById('fb');
+  const fb  = document.getElementById('fb');
   const inp = document.getElementById('ansInput');
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
-  if (!ch.answerHash) { fb.textContent = 'No answer has been set for this challenge yet.'; fb.className = 'fb bad'; return; }
+  if (!ch.answerHash) { fb.textContent = 'No answer set for this challenge yet.'; fb.className = 'fb bad'; return; }
 
   const h = await sha256(raw);
-  // raw is a local variable — it is NOT stored anywhere after this point
+  // raw is a local variable — it is NOT stored anywhere after this point.
   if (h === ch.answerHash) {
     ch.solved = true;
     score += ch.points;
@@ -381,10 +480,11 @@ document.getElementById('subBtn').addEventListener('click', async () => {
     el.textContent = score;
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 400);
-    document.getElementById('ansSection').style.display = 'none';
+    saveProgress();
+    document.getElementById('ansSection').style.display   = 'none';
     document.getElementById('solvedBanner').style.display = 'flex';
     renderBoard();
-    showToast(`✓ +${ch.points} pts — "${ch.name}" solved`);
+    showToast(`+${ch.points} pts — "${ch.name}" solved`);
     setTimeout(closePlay, 1600);
   } else {
     errShake(inp, fb, 'Incorrect flag. Try again.');
@@ -395,106 +495,24 @@ function errShake(inp, fb, msg) {
   inp.classList.remove('err');
   void inp.offsetWidth;
   inp.classList.add('err');
-  fb.textContent = msg;
-  fb.className = 'fb bad';
+  fb.textContent  = msg;
+  fb.className    = 'fb bad';
   setTimeout(() => inp.classList.remove('err'), 500);
 }
 
-/* ═══════════════════════════════════════════════════════
-   EDIT MODAL
-   ═══════════════════════════════════════════════════════ */
-function openEdit(ch, cat) {
-  activeEdit = { ch, cat };
-  const idx = challenges[cat].indexOf(ch) + 1;
-  document.getElementById('editSub').textContent = `${cat} › Challenge #${idx}`;
-  document.getElementById('eName').value = ch.name;
-  document.getElementById('ePts').value = ch.points;
-  document.getElementById('eTag1').value = ch.tag1 || '';
-  document.getElementById('eTag2').value = ch.tag2 || '';
-  document.getElementById('eDesc').value = ch.description;
-  document.getElementById('eAns').value = ''; // never pre-fill plaintext
-  document.getElementById('hashBox').textContent = ch.answerHash
-    ? `Stored hash: ${ch.answerHash}`
-    : 'No answer set yet.';
-  document.getElementById('editOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('eName').focus(), 250);
-}
-
-function closeEdit() {
-  document.getElementById('editOverlay').classList.remove('open');
-  activeEdit = null;
-}
-
-document.getElementById('editClose').addEventListener('click', closeEdit);
-document.getElementById('eCancelBtn').addEventListener('click', closeEdit);
-document.getElementById('editOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('editOverlay')) closeEdit();
-});
-
-// Live hash preview while admin types
-document.getElementById('eAns').addEventListener('input', async function () {
-  const val = this.value.trim();
-  if (!val) {
-    document.getElementById('hashBox').textContent = activeEdit?.ch?.answerHash
-      ? `Stored hash: ${activeEdit.ch.answerHash}`
-      : 'No answer set yet.';
-    return;
-  }
-  const h = await sha256(val);
-  document.getElementById('hashBox').textContent = `Preview hash: ${h}`;
-});
-
-document.getElementById('eSaveBtn').addEventListener('click', async () => {
-  if (!activeEdit) return;
-  const { ch } = activeEdit;
-
-  const newName = document.getElementById('eName').value.trim();
-  const newPts  = parseInt(document.getElementById('ePts').value);
-  const newTag1 = document.getElementById('eTag1').value.trim();
-  const newTag2 = document.getElementById('eTag2').value.trim();
-  const newDesc = document.getElementById('eDesc').value.trim();
-  const newAns  = document.getElementById('eAns').value.trim(); // local only
-
-  if (newName)         ch.name        = newName;
-  if (!isNaN(newPts))  ch.points      = newPts;
-  if (newTag1)         ch.tag1        = newTag1;
-  if (newTag2)         ch.tag2        = newTag2;
-  if (newDesc)         ch.description = newDesc;
-
-  if (newAns) {
-    ch.answerHash = await sha256(newAns);
-    // newAns is a local variable — it vanishes here, never stored anywhere
-  }
-
-  renderBoard();
-  closeEdit();
-  showToast(`✓ "${ch.name}" saved`);
-});
-
-/* ═══════════════════════════════════════════════════════
-   EDIT MODE TOGGLE
-   ═══════════════════════════════════════════════════════ */
-document.getElementById('editToggle').addEventListener('click', () => {
-  editMode = !editMode;
-  document.body.classList.toggle('edit-mode', editMode);
-  document.getElementById('editToggle').classList.toggle('active', editMode);
-  document.getElementById('editLabel').textContent = editMode ? 'Exit Edit' : 'Edit Mode';
-  renderBoard();
-});
-
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════
    KEY SHORTCUTS
-   ═══════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closePlay(); closeEdit(); }
+  if (e.key === 'Escape') closePlay();
   if (e.key === 'Enter' && document.getElementById('playOverlay').classList.contains('open')) {
     document.getElementById('subBtn').click();
   }
 });
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════
    TOAST
-   ═══════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════════ */
 let toastT;
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -504,7 +522,7 @@ function showToast(msg) {
   toastT = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-renderBoard();
+init();
 </script>
 </body>
 </html>
