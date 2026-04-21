@@ -5,547 +5,247 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WHCS Challenge Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #f4f3ef;
-    --surface: #ffffff;
-    --surface-hover: #f9f8f5;
-    --border: #e2e0d8;
-    --border-strong: #c8c5b8;
-    --text-primary: #1a1917;
-    --text-secondary: #6b6860;
-    --text-muted: #9e9b92;
-    --accent: #2d6a4f;
-    --accent-light: #e8f4ee;
-    --accent-dim: #52b788;
-    --solved: #d8f3dc;
-    --solved-border: #74c69d;
-    --solved-text: #1b4332;
-    --danger: #e63946;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-    --shadow-lg: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
-    --radius: 10px;
-    --radius-sm: 6px;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#f4f3ef;--surface:#fff;--surface-hover:#f9f8f5;
+    --border:#e2e0d8;--border-strong:#c8c5b8;
+    --text:#1a1917;--text-2:#6b6860;--text-3:#9e9b92;
+    --accent:#2d6a4f;--accent-l:#e8f4ee;--accent-d:#52b788;
+    --solved:#d8f3dc;--solved-b:#74c69d;--solved-t:#1b4332;
+    --danger:#e63946;
+    --edit:#5c5bd4;--edit-l:#eeeefc;--edit-b:#a5a4e8;
+    --sh-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --sh-md:0 4px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+    --sh-lg:0 20px 60px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
+    --r:10px;--rs:6px;
   }
+  html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
 
-  html, body {
-    height: 100%;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    line-height: 1.5;
-  }
+  /* HEADER */
+  header{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-sm)}
+  .h-left{display:flex;align-items:center;gap:.75rem}
+  .logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .site-title{font-size:.95rem;font-weight:600;letter-spacing:-.01em}
+  .h-right{display:flex;align-items:center;gap:.75rem}
 
-  /* ── HEADER ─────────────────────────────── */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: var(--shadow-sm);
-  }
+  .edit-toggle{font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;border:1px solid var(--border);background:var(--surface);border-radius:100px;padding:.3rem .9rem;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:.4rem;transition:all .15s}
+  .edit-toggle:hover,.edit-toggle.active{border-color:var(--edit-b);color:var(--edit);background:var(--edit-l)}
+  .edit-toggle svg{width:13px;height:13px;flex-shrink:0}
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
+  .score-pill{display:flex;align-items:center;gap:.5rem;background:var(--accent-l);border:1px solid var(--solved-b);border-radius:100px;padding:.35rem 1rem}
+  .score-label{font-size:.75rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+  .score-value{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+  .score-value.bump{transform:scale(1.3)}
 
-  .logo-mark {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  /* MAIN */
+  main{padding:2rem;max-width:1600px;margin:0 auto}
 
-  .logo-mark svg { width: 18px; height: 18px; fill: white; }
+  .cat-section{margin-bottom:2.5rem}
+  .cat-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1rem}
+  .cat-name{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+  .cat-line{flex:1;height:1px;background:var(--border)}
+  .cat-count{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-3)}
 
-  .site-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
-  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.625rem}
 
-  .score-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--accent-light);
-    border: 1px solid var(--solved-border);
-    border-radius: 100px;
-    padding: 0.35rem 1rem;
-    transition: all 0.3s ease;
-  }
+  /* CARD */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong);transition:background .2s}
+  .card:hover:not(.solved):not(.no-hover){border-color:var(--border-strong);box-shadow:var(--sh-md);transform:translateY(-1px)}
+  .card.solved{background:var(--solved);border-color:var(--solved-b);cursor:default}
+  .card.solved::before{background:var(--accent-d)}
+  .card.no-hover{cursor:default}
+  .card.no-hover:hover{transform:none;box-shadow:var(--sh-sm)}
+  .card-name{font-size:.825rem;font-weight:500;color:var(--text);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.solved .card-name{color:var(--solved-t)}
+  .card-pts{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text-3)}
+  .card.solved .card-pts{color:var(--accent)}
+  .solved-icon{position:absolute;top:.5rem;right:.5rem;width:16px;height:16px;opacity:0;transition:opacity .3s}
+  .card.solved .solved-icon{opacity:1}
 
-  .score-label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
+  .card-edit-btn{position:absolute;bottom:.5rem;right:.5rem;width:22px;height:22px;background:var(--edit-l);border:1px solid var(--edit-b);border-radius:5px;cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--edit);transition:background .15s;z-index:2}
+  .card-edit-btn:hover{background:var(--edit-b)}
+  .card-edit-btn svg{width:11px;height:11px}
+  body.edit-mode .card-edit-btn{display:flex}
+  body.edit-mode .card:not(.solved){cursor:default}
+  body.edit-mode .card:not(.solved):hover{transform:none;box-shadow:var(--sh-sm)}
 
-  .score-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--accent);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
+  /* MODAL SHARED */
+  .overlay{position:fixed;inset:0;z-index:100;background:rgba(20,18,16,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-lg);width:100%;max-width:480px;padding:2rem;transform:translateY(12px) scale(.98);transition:transform .25s cubic-bezier(.34,1.3,.64,1);position:relative}
+  .overlay.open .modal{transform:translateY(0) scale(1)}
+  .m-close{position:absolute;top:1rem;right:1rem;width:28px;height:28px;border:1px solid var(--border);background:transparent;border-radius:var(--rs);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:background .15s,color .15s}
+  .m-close:hover{background:var(--bg);color:var(--text)}
+  .m-close svg{width:14px;height:14px}
+  .m-tag{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid var(--solved-b);border-radius:100px;padding:.2rem .6rem;margin-bottom:.75rem}
+  .m-title{font-size:1.25rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.25rem}
+  .m-pts{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--text-3);margin-bottom:1.25rem}
+  .m-hr{height:1px;background:var(--border);margin-bottom:1.25rem}
+  .m-meta{display:flex;gap:.5rem;margin-bottom:1rem}
+  .meta-chip{font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:.25rem .6rem;color:var(--text-2)}
+  .m-desc{font-size:.875rem;color:var(--text-2);line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:1.25rem;min-height:80px;white-space:pre-wrap}
+  .ans-section label{display:block;font-size:.75rem;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem}
+  .ans-row{display:flex;gap:.5rem}
+  .ans-input{flex:1;font-family:'DM Mono',monospace;font-size:.85rem;border:1px solid var(--border);border-radius:var(--rs);padding:.6rem .875rem;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+  .ans-input:focus{border-color:var(--accent-d);box-shadow:0 0 0 3px rgba(82,183,136,.15)}
+  .ans-input.err{border-color:var(--danger);box-shadow:0 0 0 3px rgba(230,57,70,.12);animation:shake .4s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+  .sub-btn{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);padding:.6rem 1.1rem;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap}
+  .sub-btn:hover{background:#245e44}
+  .sub-btn:active{transform:scale(.97)}
+  .fb{font-size:.78rem;margin-top:.5rem;min-height:1.1em;font-weight:500}
+  .fb.ok{color:var(--accent)}.fb.bad{color:var(--danger)}
+  .solved-banner{display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:500;color:var(--accent);background:var(--solved);border:1px solid var(--solved-b);border-radius:var(--r);padding:.75rem 1rem;margin-top:.75rem}
+  .solved-banner svg{width:16px;height:16px;flex-shrink:0}
 
-  .score-value.bump {
-    transform: scale(1.3);
-    color: var(--accent);
-  }
+  /* EDIT MODAL */
+  #editOverlay .modal{max-width:520px;border-top:3px solid var(--edit)}
+  .e-title{font-size:1rem;font-weight:600;color:var(--edit);margin-bottom:.2rem}
+  .e-sub{font-size:.78rem;color:var(--text-3);margin-bottom:1.25rem}
+  .e-hr{height:1px;background:var(--border);margin-bottom:1.25rem}
+  .fg{margin-bottom:1rem}
+  .fg label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:.4rem}
+  .fi{width:100%;font-family:'DM Sans',sans-serif;font-size:.875rem;border:1px solid var(--border);border-radius:var(--rs);padding:.55rem .875rem;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+  .fi:focus{border-color:var(--edit-b);box-shadow:0 0 0 3px rgba(92,91,212,.12)}
+  .fi.mono{font-family:'DM Mono',monospace;font-size:.82rem}
+  textarea.fi{resize:vertical;min-height:80px;line-height:1.55}
+  .fi-note{font-size:.7rem;color:var(--text-3);margin-top:.3rem}
+  .fi-note strong{color:var(--edit)}
+  .hash-box{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--text-3);background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:.4rem .6rem;margin-top:.4rem;word-break:break-all}
+  .e-foot{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+  .btn-cancel{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:transparent;color:var(--text-2);border:1px solid var(--border);border-radius:var(--rs);padding:.55rem 1rem;cursor:pointer;transition:background .15s}
+  .btn-cancel:hover{background:var(--bg)}
+  .btn-save{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:var(--edit);color:#fff;border:none;border-radius:var(--rs);padding:.55rem 1.1rem;cursor:pointer;transition:background .15s,transform .1s}
+  .btn-save:hover{background:#4a49b0}
+  .btn-save:active{transform:scale(.97)}
 
-  /* ── MAIN LAYOUT ─────────────────────────── */
-  main {
-    padding: 2rem;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
+  /* TOAST */
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:.82rem;font-weight:500;padding:.6rem 1.2rem;border-radius:100px;z-index:200;opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.34,1.4,.64,1);pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* ── CATEGORY SECTION ───────────────────── */
-  .category-section {
-    margin-bottom: 2.5rem;
-  }
-
-  .category-header {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  .category-name {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .category-divider {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .category-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-  }
-
-  /* ── CHALLENGE GRID ─────────────────────── */
-  .challenge-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.625rem;
-  }
-
-  /* ── CHALLENGE CARD ─────────────────────── */
-  .challenge-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.875rem 1rem;
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.2s;
-    box-shadow: var(--shadow-sm);
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .challenge-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--border-strong);
-    transition: background 0.2s;
-  }
-
-  .challenge-card:hover {
-    border-color: var(--border-strong);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-    background: var(--surface-hover);
-  }
-
-  .challenge-card:active {
-    transform: translateY(0px);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .challenge-card.solved {
-    background: var(--solved);
-    border-color: var(--solved-border);
-    cursor: default;
-  }
-
-  .challenge-card.solved::before {
-    background: var(--accent-dim);
-  }
-
-  .challenge-card.solved:hover {
-    transform: none;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .card-name {
-    font-size: 0.825rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 0.3rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .challenge-card.solved .card-name {
-    color: var(--solved-text);
-  }
-
-  .card-points {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .challenge-card.solved .card-points {
-    color: var(--accent);
-  }
-
-  .solved-badge {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 16px;
-    height: 16px;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .challenge-card.solved .solved-badge {
-    opacity: 1;
-  }
-
-  /* ── MODAL OVERLAY ───────────────────────── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(20, 18, 16, 0.45);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-  }
-
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: var(--shadow-lg);
-    width: 100%;
-    max-width: 480px;
-    padding: 2rem;
-    transform: translateY(12px) scale(0.98);
-    transition: transform 0.25s cubic-bezier(0.34, 1.3, 0.64, 1);
-    position: relative;
-  }
-
-  .modal-overlay.open .modal {
-    transform: translateY(0) scale(1);
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 28px;
-    height: 28px;
-    border: 1px solid var(--border);
-    background: transparent;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    transition: background 0.15s, color 0.15s;
-  }
-
-  .modal-close:hover {
-    background: var(--bg);
-    color: var(--text-primary);
-  }
-
-  .modal-close svg { width: 14px; height: 14px; }
-
-  .modal-category-tag {
-    display: inline-block;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: var(--accent-light);
-    border: 1px solid var(--solved-border);
-    border-radius: 100px;
-    padding: 0.2rem 0.6rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-  }
-
-  .modal-points {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 1.25rem;
-  }
-
-  .modal-divider {
-    height: 1px;
-    background: var(--border);
-    margin-bottom: 1.25rem;
-  }
-
-  .modal-meta {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .meta-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 500;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.25rem 0.6rem;
-    color: var(--text-secondary);
-  }
-
-  .modal-description {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    line-height: 1.65;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.875rem 1rem;
-    margin-bottom: 1.25rem;
-    min-height: 80px;
-  }
-
-  .answer-section label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    margin-bottom: 0.5rem;
-  }
-
-  .answer-row {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .answer-input {
-    flex: 1;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.6rem 0.875rem;
-    background: var(--surface);
-    color: var(--text-primary);
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-
-  .answer-input:focus {
-    border-color: var(--accent-dim);
-    box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
-  }
-
-  .answer-input.error {
-    border-color: var(--danger);
-    box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
-    animation: shake 0.4s ease;
-  }
-
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-5px); }
-    60% { transform: translateX(5px); }
-    80% { transform: translateX(-3px); }
-  }
-
-  .submit-btn {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.6rem 1.1rem;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    white-space: nowrap;
-  }
-
-  .submit-btn:hover { background: #245e44; }
-  .submit-btn:active { transform: scale(0.97); }
-
-  .feedback-msg {
-    font-size: 0.78rem;
-    margin-top: 0.5rem;
-    min-height: 1.1em;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-
-  .feedback-msg.correct { color: var(--accent); }
-  .feedback-msg.wrong { color: var(--danger); }
-
-  .modal-solved-state {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--accent);
-    background: var(--solved);
-    border: 1px solid var(--solved-border);
-    border-radius: var(--radius);
-    padding: 0.75rem 1rem;
-    margin-top: 0.75rem;
-  }
-
-  .modal-solved-state svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-  /* ── TOAST ───────────────────────────────── */
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--text-primary);
-    color: white;
-    font-size: 0.82rem;
-    font-weight: 500;
-    padding: 0.6rem 1.2rem;
-    border-radius: 100px;
-    z-index: 200;
-    opacity: 0;
-    transition: opacity 0.25s, transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* ── SCROLLBAR ───────────────────────────── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-  <div class="header-left">
-    <div class="logo-mark">
+  <div class="h-left">
+    <div class="logo">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
     </div>
     <span class="site-title">WHCS Challenge Board</span>
   </div>
-  <div class="score-pill">
-    <span class="score-label">Score</span>
-    <span class="score-value" id="totalScore">0</span>
+  <div class="h-right">
+    <button class="edit-toggle" id="editToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span id="editLabel">Edit Mode</span>
+    </button>
+    <div class="score-pill">
+      <span class="score-label">Score</span>
+      <span class="score-value" id="totalScore">0</span>
+    </div>
   </div>
 </header>
 
-<!-- MAIN -->
 <main id="boardMain"></main>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalBox">
-    <button class="modal-close" id="modalClose">
+<!-- CHALLENGE MODAL -->
+<div class="overlay" id="playOverlay">
+  <div class="modal">
+    <button class="m-close" id="playClose">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
-    <div class="modal-category-tag" id="mCategory"></div>
-    <div class="modal-title" id="mTitle"></div>
-    <div class="modal-points" id="mPoints"></div>
-    <div class="modal-divider"></div>
-    <div class="modal-meta">
-      <span class="meta-tag">DF</span>
-      <span class="meta-tag">AK</span>
+    <div class="m-tag" id="mCat"></div>
+    <div class="m-title" id="mTitle"></div>
+    <div class="m-pts" id="mPts"></div>
+    <div class="m-hr"></div>
+    <div class="m-meta">
+      <span class="meta-chip" id="mTag1">DF</span>
+      <span class="meta-chip" id="mTag2">AK</span>
     </div>
-    <div class="modal-description" id="mDesc">blank</div>
-    <div class="answer-section" id="answerSection">
+    <div class="m-desc" id="mDesc"></div>
+    <div class="ans-section" id="ansSection">
       <label>Flag / Answer</label>
-      <div class="answer-row">
-        <input class="answer-input" id="answerInput" type="text" placeholder="WHCS{...}" autocomplete="off" spellcheck="false">
-        <button class="submit-btn" id="submitBtn">Submit</button>
+      <div class="ans-row">
+        <input class="ans-input" id="ansInput" type="text" placeholder="WHCS{...}" autocomplete="off" spellcheck="false">
+        <button class="sub-btn" id="subBtn">Submit</button>
       </div>
-      <div class="feedback-msg" id="feedbackMsg"></div>
+      <div class="fb" id="fb"></div>
     </div>
-    <div class="modal-solved-state" id="solvedState" style="display:none">
+    <div class="solved-banner" id="solvedBanner" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       Challenge solved! Well done.
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- EDIT MODAL -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <button class="m-close" id="editClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="e-title">Edit Challenge</div>
+    <div class="e-sub" id="editSub"></div>
+    <div class="e-hr"></div>
+
+    <div class="fg">
+      <label>Challenge Name</label>
+      <input class="fi" id="eName" type="text" placeholder="e.g. Cookie Monster">
+    </div>
+    <div class="fg">
+      <label>Point Value</label>
+      <input class="fi mono" id="ePts" type="number" min="0" placeholder="100">
+    </div>
+    <div style="display:flex;gap:.75rem">
+      <div class="fg" style="flex:1">
+        <label>Tag 1</label>
+        <input class="fi" id="eTag1" type="text" placeholder="DF">
+      </div>
+      <div class="fg" style="flex:1">
+        <label>Tag 2</label>
+        <input class="fi" id="eTag2" type="text" placeholder="AK">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <textarea class="fi" id="eDesc" placeholder="Challenge description…"></textarea>
+    </div>
+    <div class="fg">
+      <label>Answer / Flag</label>
+      <input class="fi mono" id="eAns" type="text" placeholder="WHCS{your_flag_here}" autocomplete="off" spellcheck="false">
+      <div class="fi-note">Answer is <strong>hashed (SHA-256) before saving</strong> — plaintext is never stored on the page.</div>
+      <div class="hash-box" id="hashBox">Enter a flag above to preview its hash…</div>
+    </div>
+
+    <div class="e-foot">
+      <button class="btn-cancel" id="eCancelBtn">Cancel</button>
+      <button class="btn-save" id="eSaveBtn">Save Challenge</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── DATA ───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   SHA-256 via Web Crypto API
+   Answers are ONLY ever stored as hashes. Plaintext is a
+   local variable that disappears after the hash is made.
+   ═══════════════════════════════════════════════════════ */
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════ */
 const CATEGORIES = [
   'Web Exploitation',
   'Cryptography',
@@ -555,175 +255,255 @@ const CATEGORIES = [
   'OSINT',
   'Miscellaneous',
 ];
+const PER_CAT = 20;
 
-const CORRECT_ANSWER = 'WHCS{123}';
-const CHALLENGES_PER_CAT = 20;
-
-// Build challenge data
 const challenges = {};
 CATEGORIES.forEach(cat => {
-  challenges[cat] = Array.from({ length: CHALLENGES_PER_CAT }, (_, i) => ({
-    id: `${cat}__${i}`,
+  challenges[cat] = Array.from({ length: PER_CAT }, (_, i) => ({
+    id: `${cat}|${i}`,
     name: 'temp',
     points: 100,
+    tag1: 'DF',
+    tag2: 'AK',
     description: 'blank',
+    answerHash: '', // ← SHA-256 hash only; plaintext never lives here
     solved: false,
   }));
 });
 
-/* ── STATE ──────────────────────────────────────────── */
-let totalScore = 0;
-let activeChallenge = null; // reference to challenge object
+// Hash the default answer and assign it to all cards on load
+(async () => {
+  const h = await sha256('WHCS{123}');
+  CATEGORIES.forEach(cat => challenges[cat].forEach(ch => ch.answerHash = h));
+})();
 
-/* ── RENDER BOARD ───────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+let score = 0;
+let editMode = false;
+let activePlay = null;   // { ch, cat }
+let activeEdit = null;   // { ch, cat }
+
+/* ═══════════════════════════════════════════════════════
+   BOARD
+   ═══════════════════════════════════════════════════════ */
 function renderBoard() {
   const main = document.getElementById('boardMain');
   main.innerHTML = '';
-
   CATEGORIES.forEach(cat => {
-    const section = document.createElement('section');
-    section.className = 'category-section';
-
-    const header = document.createElement('div');
-    header.className = 'category-header';
-    header.innerHTML = `
-      <span class="category-name">${cat}</span>
-      <div class="category-divider"></div>
-      <span class="category-count">${challenges[cat].filter(c=>c.solved).length}/${CHALLENGES_PER_CAT}</span>
-    `;
-    section.appendChild(header);
-
+    const sec = document.createElement('section');
+    sec.className = 'cat-section';
+    const solved = challenges[cat].filter(c => c.solved).length;
+    sec.innerHTML = `<div class="cat-header">
+      <span class="cat-name">${cat}</span>
+      <div class="cat-line"></div>
+      <span class="cat-count">${solved}/${PER_CAT}</span>
+    </div>`;
     const grid = document.createElement('div');
-    grid.className = 'challenge-grid';
-
+    grid.className = 'grid';
     challenges[cat].forEach(ch => {
       const card = document.createElement('div');
-      card.className = 'challenge-card' + (ch.solved ? ' solved' : '');
-      card.dataset.id = ch.id;
+      card.className = 'card' + (ch.solved ? ' solved' : '') + (editMode ? ' no-hover' : '');
       card.innerHTML = `
-        <svg class="solved-badge" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <div class="card-name">${ch.name}</div>
-        <div class="card-points">${ch.points} pts</div>
-      `;
-      if (!ch.solved) {
-        card.addEventListener('click', () => openModal(ch, cat));
-      }
+        <div class="card-pts">${ch.points} pts</div>
+        <button class="card-edit-btn" title="Edit this challenge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>`;
+
+      card.querySelector('.card-edit-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        openEdit(ch, cat);
+      });
+
+      card.addEventListener('click', () => {
+        if (editMode || ch.solved) return;
+        openPlay(ch, cat);
+      });
+
       grid.appendChild(card);
     });
-
-    section.appendChild(grid);
-    main.appendChild(section);
+    sec.appendChild(grid);
+    main.appendChild(sec);
   });
 }
 
-/* ── MODAL ──────────────────────────────────────────── */
-function openModal(ch, cat) {
-  activeChallenge = ch;
-
-  document.getElementById('mCategory').textContent = cat;
+/* ═══════════════════════════════════════════════════════
+   PLAY MODAL
+   ═══════════════════════════════════════════════════════ */
+function openPlay(ch, cat) {
+  activePlay = { ch, cat };
+  document.getElementById('mCat').textContent = cat;
   document.getElementById('mTitle').textContent = ch.name;
-  document.getElementById('mPoints').textContent = `${ch.points} points`;
+  document.getElementById('mPts').textContent = `${ch.points} points`;
+  document.getElementById('mTag1').textContent = ch.tag1 || 'DF';
+  document.getElementById('mTag2').textContent = ch.tag2 || 'AK';
   document.getElementById('mDesc').textContent = ch.description;
-  document.getElementById('answerInput').value = '';
-  document.getElementById('feedbackMsg').textContent = '';
-  document.getElementById('feedbackMsg').className = 'feedback-msg';
-  document.getElementById('answerInput').classList.remove('error');
+  document.getElementById('ansInput').value = '';
+  document.getElementById('fb').textContent = '';
+  document.getElementById('fb').className = 'fb';
+  document.getElementById('ansInput').classList.remove('err');
+  document.getElementById('ansSection').style.display = ch.solved ? 'none' : 'block';
+  document.getElementById('solvedBanner').style.display = ch.solved ? 'flex' : 'none';
+  document.getElementById('playOverlay').classList.add('open');
+  if (!ch.solved) setTimeout(() => document.getElementById('ansInput').focus(), 250);
+}
 
-  if (ch.solved) {
-    document.getElementById('answerSection').style.display = 'none';
-    document.getElementById('solvedState').style.display = 'flex';
+function closePlay() {
+  document.getElementById('playOverlay').classList.remove('open');
+  activePlay = null;
+}
+
+document.getElementById('playClose').addEventListener('click', closePlay);
+document.getElementById('playOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('playOverlay')) closePlay();
+});
+
+/* SUBMIT — hash the input, compare to stored hash */
+document.getElementById('subBtn').addEventListener('click', async () => {
+  if (!activePlay || activePlay.ch.solved) return;
+  const { ch } = activePlay;
+  const raw = document.getElementById('ansInput').value.trim();
+  const fb = document.getElementById('fb');
+  const inp = document.getElementById('ansInput');
+
+  if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
+  if (!ch.answerHash) { fb.textContent = 'No answer has been set for this challenge yet.'; fb.className = 'fb bad'; return; }
+
+  const h = await sha256(raw);
+  // raw is a local variable — it is NOT stored anywhere after this point
+  if (h === ch.answerHash) {
+    ch.solved = true;
+    score += ch.points;
+    const el = document.getElementById('totalScore');
+    el.textContent = score;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 400);
+    document.getElementById('ansSection').style.display = 'none';
+    document.getElementById('solvedBanner').style.display = 'flex';
+    renderBoard();
+    showToast(`✓ +${ch.points} pts — "${ch.name}" solved`);
+    setTimeout(closePlay, 1600);
   } else {
-    document.getElementById('answerSection').style.display = 'block';
-    document.getElementById('solvedState').style.display = 'none';
-  }
-
-  document.getElementById('modalOverlay').classList.add('open');
-  if (!ch.solved) {
-    setTimeout(() => document.getElementById('answerInput').focus(), 250);
-  }
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  activeChallenge = null;
-}
-
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) {
-    document.getElementById('submitBtn').click();
+    errShake(inp, fb, 'Incorrect flag. Try again.');
   }
 });
 
-/* ── SUBMIT ─────────────────────────────────────────── */
-document.getElementById('submitBtn').addEventListener('click', () => {
-  if (!activeChallenge || activeChallenge.solved) return;
+function errShake(inp, fb, msg) {
+  inp.classList.remove('err');
+  void inp.offsetWidth;
+  inp.classList.add('err');
+  fb.textContent = msg;
+  fb.className = 'fb bad';
+  setTimeout(() => inp.classList.remove('err'), 500);
+}
 
-  const input = document.getElementById('answerInput').value.trim();
-  const feedback = document.getElementById('feedbackMsg');
-  const inp = document.getElementById('answerInput');
+/* ═══════════════════════════════════════════════════════
+   EDIT MODAL
+   ═══════════════════════════════════════════════════════ */
+function openEdit(ch, cat) {
+  activeEdit = { ch, cat };
+  const idx = challenges[cat].indexOf(ch) + 1;
+  document.getElementById('editSub').textContent = `${cat} › Challenge #${idx}`;
+  document.getElementById('eName').value = ch.name;
+  document.getElementById('ePts').value = ch.points;
+  document.getElementById('eTag1').value = ch.tag1 || '';
+  document.getElementById('eTag2').value = ch.tag2 || '';
+  document.getElementById('eDesc').value = ch.description;
+  document.getElementById('eAns').value = ''; // never pre-fill plaintext
+  document.getElementById('hashBox').textContent = ch.answerHash
+    ? `Stored hash: ${ch.answerHash}`
+    : 'No answer set yet.';
+  document.getElementById('editOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('eName').focus(), 250);
+}
 
-  if (!input) {
-    inp.classList.remove('error');
-    void inp.offsetWidth;
-    inp.classList.add('error');
-    feedback.textContent = 'Please enter an answer.';
-    feedback.className = 'feedback-msg wrong';
-    setTimeout(() => inp.classList.remove('error'), 500);
+function closeEdit() {
+  document.getElementById('editOverlay').classList.remove('open');
+  activeEdit = null;
+}
+
+document.getElementById('editClose').addEventListener('click', closeEdit);
+document.getElementById('eCancelBtn').addEventListener('click', closeEdit);
+document.getElementById('editOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('editOverlay')) closeEdit();
+});
+
+// Live hash preview while admin types
+document.getElementById('eAns').addEventListener('input', async function () {
+  const val = this.value.trim();
+  if (!val) {
+    document.getElementById('hashBox').textContent = activeEdit?.ch?.answerHash
+      ? `Stored hash: ${activeEdit.ch.answerHash}`
+      : 'No answer set yet.';
     return;
   }
+  const h = await sha256(val);
+  document.getElementById('hashBox').textContent = `Preview hash: ${h}`;
+});
 
-  if (input === CORRECT_ANSWER) {
-    // Mark solved
-    activeChallenge.solved = true;
+document.getElementById('eSaveBtn').addEventListener('click', async () => {
+  if (!activeEdit) return;
+  const { ch } = activeEdit;
 
-    // Update score
-    totalScore += activeChallenge.points;
-    const scoreEl = document.getElementById('totalScore');
-    scoreEl.textContent = totalScore;
-    scoreEl.classList.add('bump');
-    setTimeout(() => scoreEl.classList.remove('bump'), 400);
+  const newName = document.getElementById('eName').value.trim();
+  const newPts  = parseInt(document.getElementById('ePts').value);
+  const newTag1 = document.getElementById('eTag1').value.trim();
+  const newTag2 = document.getElementById('eTag2').value.trim();
+  const newDesc = document.getElementById('eDesc').value.trim();
+  const newAns  = document.getElementById('eAns').value.trim(); // local only
 
-    // UI feedback
-    feedback.textContent = `+${activeChallenge.points} pts — Correct!`;
-    feedback.className = 'feedback-msg correct';
-    document.getElementById('answerSection').style.display = 'none';
-    document.getElementById('solvedState').style.display = 'flex';
+  if (newName)         ch.name        = newName;
+  if (!isNaN(newPts))  ch.points      = newPts;
+  if (newTag1)         ch.tag1        = newTag1;
+  if (newTag2)         ch.tag2        = newTag2;
+  if (newDesc)         ch.description = newDesc;
 
-    // Re-render board behind modal to show green card
-    renderBoard();
+  if (newAns) {
+    ch.answerHash = await sha256(newAns);
+    // newAns is a local variable — it vanishes here, never stored anywhere
+  }
 
-    // Toast
-    showToast(`✓ +${activeChallenge.points} pts — "${activeChallenge.name}" solved`);
+  renderBoard();
+  closeEdit();
+  showToast(`✓ "${ch.name}" saved`);
+});
 
-    // Close after delay
-    setTimeout(closeModal, 1600);
-  } else {
-    inp.classList.remove('error');
-    void inp.offsetWidth;
-    inp.classList.add('error');
-    feedback.textContent = 'Incorrect flag. Try again.';
-    feedback.className = 'feedback-msg wrong';
-    setTimeout(() => inp.classList.remove('error'), 500);
+/* ═══════════════════════════════════════════════════════
+   EDIT MODE TOGGLE
+   ═══════════════════════════════════════════════════════ */
+document.getElementById('editToggle').addEventListener('click', () => {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editToggle').classList.toggle('active', editMode);
+  document.getElementById('editLabel').textContent = editMode ? 'Exit Edit' : 'Edit Mode';
+  renderBoard();
+});
+
+/* ═══════════════════════════════════════════════════════
+   KEY SHORTCUTS
+   ═══════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closePlay(); closeEdit(); }
+  if (e.key === 'Enter' && document.getElementById('playOverlay').classList.contains('open')) {
+    document.getElementById('subBtn').click();
   }
 });
 
-/* ── TOAST ──────────────────────────────────────────── */
-let toastTimer;
+/* ═══════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════ */
+let toastT;
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ── INIT ───────────────────────────────────────────── */
 renderBoard();
 </script>
 </body>
