@@ -1,11 +1,730 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Warren Hills CyberStars</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHCS Challenge Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f3ef;
+    --surface: #ffffff;
+    --surface-hover: #f9f8f5;
+    --border: #e2e0d8;
+    --border-strong: #c8c5b8;
+    --text-primary: #1a1917;
+    --text-secondary: #6b6860;
+    --text-muted: #9e9b92;
+    --accent: #2d6a4f;
+    --accent-light: #e8f4ee;
+    --accent-dim: #52b788;
+    --solved: #d8f3dc;
+    --solved-border: #74c69d;
+    --solved-text: #1b4332;
+    --danger: #e63946;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 18px; height: 18px; fill: white; }
+
+  .site-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .score-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-light);
+    border: 1px solid var(--solved-border);
+    border-radius: 100px;
+    padding: 0.35rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .score-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .score-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--accent);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .score-value.bump {
+    transform: scale(1.3);
+    color: var(--accent);
+  }
+
+  /* ── MAIN LAYOUT ─────────────────────────── */
+  main {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ── CATEGORY SECTION ───────────────────── */
+  .category-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .category-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .category-divider {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .category-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  /* ── CHALLENGE GRID ─────────────────────── */
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.625rem;
+  }
+
+  /* ── CHALLENGE CARD ─────────────────────── */
+  .challenge-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.2s;
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .challenge-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--border-strong);
+    transition: background 0.2s;
+  }
+
+  .challenge-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    background: var(--surface-hover);
+  }
+
+  .challenge-card:active {
+    transform: translateY(0px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .challenge-card.solved {
+    background: var(--solved);
+    border-color: var(--solved-border);
+    cursor: default;
+  }
+
+  .challenge-card.solved::before {
+    background: var(--accent-dim);
+  }
+
+  .challenge-card.solved:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-name {
+    font-size: 0.825rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .challenge-card.solved .card-name {
+    color: var(--solved-text);
+  }
+
+  .card-points {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .challenge-card.solved .card-points {
+    color: var(--accent);
+  }
+
+  .solved-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .challenge-card.solved .solved-badge {
+    opacity: 1;
+  }
+
+  /* ── MODAL OVERLAY ───────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(20, 18, 16, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 480px;
+    padding: 2rem;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s cubic-bezier(0.34, 1.3, 0.64, 1);
+    position: relative;
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    background: transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .modal-close:hover {
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+
+  .modal-close svg { width: 14px; height: 14px; }
+
+  .modal-category-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: 1px solid var(--solved-border);
+    border-radius: 100px;
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-points {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .meta-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.6rem;
+    color: var(--text-secondary);
+  }
+
+  .modal-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+    margin-bottom: 1.25rem;
+    min-height: 80px;
+  }
+
+  .answer-section label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.5rem;
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .answer-input {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.875rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .answer-input:focus {
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+  }
+
+  .answer-input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    80% { transform: translateX(-3px); }
+  }
+
+  .submit-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .submit-btn:hover { background: #245e44; }
+  .submit-btn:active { transform: scale(0.97); }
+
+  .feedback-msg {
+    font-size: 0.78rem;
+    margin-top: 0.5rem;
+    min-height: 1.1em;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .feedback-msg.correct { color: var(--accent); }
+  .feedback-msg.wrong { color: var(--danger); }
+
+  .modal-solved-state {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--solved);
+    border: 1px solid var(--solved-border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .modal-solved-state svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ── TOAST ───────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text-primary);
+    color: white;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 100px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── SCROLLBAR ───────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+</style>
 </head>
 <body>
-  <h1>Welcome to WHCS CTF</h1>
-  <p>Category: Cryptography</p>
-  <p>Challenge 1: Decode this message</p>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="site-title">WHCS Challenge Board</span>
+  </div>
+  <div class="score-pill">
+    <span class="score-label">Score</span>
+    <span class="score-value" id="totalScore">0</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="boardMain"></main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" id="modalClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-category-tag" id="mCategory"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-points" id="mPoints"></div>
+    <div class="modal-divider"></div>
+    <div class="modal-meta">
+      <span class="meta-tag">DF</span>
+      <span class="meta-tag">AK</span>
+    </div>
+    <div class="modal-description" id="mDesc">blank</div>
+    <div class="answer-section" id="answerSection">
+      <label>Flag / Answer</label>
+      <div class="answer-row">
+        <input class="answer-input" id="answerInput" type="text" placeholder="WHCS{...}" autocomplete="off" spellcheck="false">
+        <button class="submit-btn" id="submitBtn">Submit</button>
+      </div>
+      <div class="feedback-msg" id="feedbackMsg"></div>
+    </div>
+    <div class="modal-solved-state" id="solvedState" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Challenge solved! Well done.
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── DATA ───────────────────────────────────────────── */
+const CATEGORIES = [
+  'Web Exploitation',
+  'Cryptography',
+  'Reverse Engineering',
+  'Forensics',
+  'Binary Exploitation',
+  'OSINT',
+  'Miscellaneous',
+];
+
+const CORRECT_ANSWER = 'WHCS{123}';
+const CHALLENGES_PER_CAT = 20;
+
+// Build challenge data
+const challenges = {};
+CATEGORIES.forEach(cat => {
+  challenges[cat] = Array.from({ length: CHALLENGES_PER_CAT }, (_, i) => ({
+    id: `${cat}__${i}`,
+    name: 'temp',
+    points: 100,
+    description: 'blank',
+    solved: false,
+  }));
+});
+
+/* ── STATE ──────────────────────────────────────────── */
+let totalScore = 0;
+let activeChallenge = null; // reference to challenge object
+
+/* ── RENDER BOARD ───────────────────────────────────── */
+function renderBoard() {
+  const main = document.getElementById('boardMain');
+  main.innerHTML = '';
+
+  CATEGORIES.forEach(cat => {
+    const section = document.createElement('section');
+    section.className = 'category-section';
+
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = `
+      <span class="category-name">${cat}</span>
+      <div class="category-divider"></div>
+      <span class="category-count">${challenges[cat].filter(c=>c.solved).length}/${CHALLENGES_PER_CAT}</span>
+    `;
+    section.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'challenge-grid';
+
+    challenges[cat].forEach(ch => {
+      const card = document.createElement('div');
+      card.className = 'challenge-card' + (ch.solved ? ' solved' : '');
+      card.dataset.id = ch.id;
+      card.innerHTML = `
+        <svg class="solved-badge" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="card-name">${ch.name}</div>
+        <div class="card-points">${ch.points} pts</div>
+      `;
+      if (!ch.solved) {
+        card.addEventListener('click', () => openModal(ch, cat));
+      }
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    main.appendChild(section);
+  });
+}
+
+/* ── MODAL ──────────────────────────────────────────── */
+function openModal(ch, cat) {
+  activeChallenge = ch;
+
+  document.getElementById('mCategory').textContent = cat;
+  document.getElementById('mTitle').textContent = ch.name;
+  document.getElementById('mPoints').textContent = `${ch.points} points`;
+  document.getElementById('mDesc').textContent = ch.description;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('feedbackMsg').textContent = '';
+  document.getElementById('feedbackMsg').className = 'feedback-msg';
+  document.getElementById('answerInput').classList.remove('error');
+
+  if (ch.solved) {
+    document.getElementById('answerSection').style.display = 'none';
+    document.getElementById('solvedState').style.display = 'flex';
+  } else {
+    document.getElementById('answerSection').style.display = 'block';
+    document.getElementById('solvedState').style.display = 'none';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  if (!ch.solved) {
+    setTimeout(() => document.getElementById('answerInput').focus(), 250);
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  activeChallenge = null;
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) {
+    document.getElementById('submitBtn').click();
+  }
+});
+
+/* ── SUBMIT ─────────────────────────────────────────── */
+document.getElementById('submitBtn').addEventListener('click', () => {
+  if (!activeChallenge || activeChallenge.solved) return;
+
+  const input = document.getElementById('answerInput').value.trim();
+  const feedback = document.getElementById('feedbackMsg');
+  const inp = document.getElementById('answerInput');
+
+  if (!input) {
+    inp.classList.remove('error');
+    void inp.offsetWidth;
+    inp.classList.add('error');
+    feedback.textContent = 'Please enter an answer.';
+    feedback.className = 'feedback-msg wrong';
+    setTimeout(() => inp.classList.remove('error'), 500);
+    return;
+  }
+
+  if (input === CORRECT_ANSWER) {
+    // Mark solved
+    activeChallenge.solved = true;
+
+    // Update score
+    totalScore += activeChallenge.points;
+    const scoreEl = document.getElementById('totalScore');
+    scoreEl.textContent = totalScore;
+    scoreEl.classList.add('bump');
+    setTimeout(() => scoreEl.classList.remove('bump'), 400);
+
+    // UI feedback
+    feedback.textContent = `+${activeChallenge.points} pts — Correct!`;
+    feedback.className = 'feedback-msg correct';
+    document.getElementById('answerSection').style.display = 'none';
+    document.getElementById('solvedState').style.display = 'flex';
+
+    // Re-render board behind modal to show green card
+    renderBoard();
+
+    // Toast
+    showToast(`✓ +${activeChallenge.points} pts — "${activeChallenge.name}" solved`);
+
+    // Close after delay
+    setTimeout(closeModal, 1600);
+  } else {
+    inp.classList.remove('error');
+    void inp.offsetWidth;
+    inp.classList.add('error');
+    feedback.textContent = 'Incorrect flag. Try again.';
+    feedback.className = 'feedback-msg wrong';
+    setTimeout(() => inp.classList.remove('error'), 500);
+  }
+});
+
+/* ── TOAST ──────────────────────────────────────────── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── INIT ───────────────────────────────────────────── */
+renderBoard();
+</script>
 </body>
 </html>
