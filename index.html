@@ -359,13 +359,13 @@ function saveProgress() {
     challenges[cat].forEach((ch, i) => {
       if (ch.solved) {
         const key = `${cat}|${ch.name}`;
-        solvedIds.push(key);
+        solvedNames.push(key);
         if (ch.solvedAt) tsMap[key] = ch.solvedAt;
       }
     });
   });
   localStorage.setItem('whcs_score',  score);
-  localStorage.setItem('whcs_solved', JSON.stringify(solvedIds));
+  localStorage.setItem('whcs_solved', JSON.stringify(solvedNames));
   localStorage.setItem('whcs_ts',     JSON.stringify(tsMap));
 }
 
