@@ -353,12 +353,12 @@ let activePlay = null;
    whcs_ts     — JSON object { "category|index": ISO timestamp }
    ════════════════════════════════════════════════════════════════ */
 function saveProgress() {
-  const solvedIds = [];
+  const solvedNames = [];
   const tsMap = {};
   Object.keys(challenges).forEach(cat => {
     challenges[cat].forEach((ch, i) => {
       if (ch.solved) {
-        const key = `${cat}|${i}`;
+        const key = `${cat}|${ch.name}`;
         solvedIds.push(key);
         if (ch.solvedAt) tsMap[key] = ch.solvedAt;
       }
@@ -382,10 +382,11 @@ function loadProgress() {
       ids.forEach(id => {
         const sep = id.lastIndexOf('|');
         const cat = id.slice(0, sep);
-        const idx = parseInt(id.slice(sep + 1));
-        if (challenges[cat] && challenges[cat][idx]) {
-          challenges[cat][idx].solved   = true;
-          challenges[cat][idx].solvedAt = tsMap[id] || null;
+        const challengeName = id.slice(sep + 1);
+        const challenge = challenges[cat]?.find(c => c.name === challengeName);
+        if (challenge) {
+          challenge.solved = true;
+          challenge.solvedAt = tsMap[id] || null;
         }
       });
     } catch(e) {}
