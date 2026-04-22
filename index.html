@@ -159,7 +159,7 @@
   padding:1.3125rem 1.5rem;
   margin-bottom:1.875rem;
   min-height:120px; /* 80 → 120 */
-  white-space:pre-wrap
+  white-space:pre-wrap;
   text-align:center;        /* centers text horizontally */
   display:flex;             /* enables vertical centering */
   align-items:center;       /* vertical center */
@@ -281,7 +281,7 @@ const CHALLENGE_DATA = {
     { name:'Back To The Basics',           points:25,  tags:['DF'],        description:'Can you solve this?\n"}1egnellahc{SCHW"',                                                                                                  answer:'WHCS{challenge1}' },
     { name:'Is Julius Caesar The Best?',   points:50,  tags:['DF'],        description:'GRMC{Xkr, Tevsec Xyfkmrbyxy sc loddob}',                                                                                                   answer:'WHCS{Nah, Julius Novachrono is better}' },
     { name:'First We Mine, Then We Craft', points:50,  tags:['DF'],        description:'My friend keeps asking me for a base stack, what does that mean?\n"V0hDU3s2NF9pc19vbmVfc3RhY2t9"',                                         answer:'WHCS{64_is_one_stack}' },
-    { name:'Weekly Wednesdays',            points:50, tags:['DF'],         description:'The son of a man of many, one might call Omni-Man. "⠺⠓⠉⠎{⠊⠋⠸⠓⠑⠸⠊⠎⠸⠊⠝⠧⠊⠝⠉⠊⠃⠇⠑⠸⠞⠓⠑⠝⠸⠺⠓⠽⠸⠉⠁⠝⠸⠊⠸⠎⠑⠑⠸⠓⠊⠍}"',                   answer: ['WHCS{If_He_Is_Invincible_Then_Why_Can_I_See_Him}',  'WHCS{ifheisinvinciblethenwhycaniseehim}',  'WHCS{IfHeIsInvincibleThenWhyCanISeeHim}',  'WHCS{if_he_is_invincible_then_why_can_i_see_him}'],
+    { name:'Weekly Wednesdays',            points:50, tags:['DF'],         description:'The son of a man of many, one might call Omni-Man. "⠺⠓⠉⠎{⠊⠋⠸⠓⠑⠸⠊⠎⠸⠊⠝⠧⠊⠝⠉⠊⠃⠇⠑⠸⠞⠓⠑⠝⠸⠺⠓⠽⠸⠉⠁⠝⠸⠊⠸⠎⠑⠑⠸⠓⠊⠍}"',                   answer: ['WHCS{If_He_Is_Invincible_Then_Why_Can_I_See_Him}',  'WHCS{ifheisinvinciblethenwhycaniseehim}',  'WHCS{IfHeIsInvincibleThenWhyCanISeeHim}',  'WHCS{if_he_is_invincible_then_why_can_i_see_him}']},
     { name:'Cycles',                       points:75,  tags:['DF'],        description:'I can\'t stop spinning! I must\'ve rotated 47 times at least.\n"(wr$L`07bb`05`KKJN"',                                                      answer:'WHCS{1_f331_d1zzy}' },
     { name:'Yuno Ball',                    points:100, tags:['DF'],        description:'What\'s this talk about the BlackBulls? Do you have a clue, Blaise de Vigenère? "XSCU{Diy_Qtxus_Cnywyc_Cwufrpc_Jh_Znlpmet}"',              answer:'WHCS{The_Fifth_Clover_Returns_In_October}' },
     { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
@@ -496,13 +496,15 @@ async function init() {
     challenges[cat] = [];
     for (let i = 0; i < CHALLENGE_DATA[cat].length; i++) {
       const src  = CHALLENGE_DATA[cat][i];
-      const hash = await sha256(src.answer);
+     const hashes = Array.isArray(src.answer)
+      ? await Promise.all(src.answer.map(a => sha256(a)))
+      : [await sha256(src.answer)];
       challenges[cat].push({
         name:        src.name,
         points:      src.points,
         tags:        Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
         description: src.description,
-        answerHash:  hash,
+        answerHashes:  hashes,
         solved:      false,
         solvedAt:    null,
       });
@@ -622,11 +624,11 @@ document.getElementById('subBtn').addEventListener('click', async () => {
   const inp = document.getElementById('ansInput');
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
-  if (!ch.answerHash) { fb.textContent = 'No answer set for this challenge yet.'; fb.className = 'fb bad'; return; }
+  if (!ch.answerHashes || ch.answerHashes.length === 0) { fb.textContent = 'No answer set for this challenge yet.'; fb.className = 'fb bad'; return; }
 
   const h = await sha256(raw);
   // raw is a local variable — not stored anywhere after this point
-  if (h === ch.answerHash) {
+  if (ch.answerHashes.includes(h)) {
     const now   = new Date().toISOString();
     ch.solved   = true;
     ch.solvedAt = now;
