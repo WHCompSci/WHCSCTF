@@ -1,1 +1,3 @@
-Vigenere: Ai seems to struggle with or without the key.
+Vigenere: Ai seems to struggle with or without the key. key for yuno ball is BlackBulls
+Create a solving key for hard problems.
+Learn how to enable/use pull requests correctly.
