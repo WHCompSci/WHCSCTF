@@ -1,5 +1,4 @@
 Vigenere: Ai seems to struggle with or without the key. key for yuno ball is BlackBulls
 Create a solving key for hard problems.
-Learn how to enable/use pull requests correctly.
 Add tags for cyber1 or coding with kids to sort for in the future
 make a json file that contains data so you cant cheat by looking into the html

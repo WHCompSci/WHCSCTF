@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- bleh -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WHCS Challenge Board</title>
@@ -10,7 +9,7 @@
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --bg:#f4f3ef;--surface:#fff;--surface-hover:#f9f8f5;
+    --bg:#f4f3ef;--surface:#fff;
     --border:#e2e0d8;--border-strong:#c8c5b8;
     --text:#1a1917;--text-2:#6b6860;--text-3:#9e9b92;
     --accent:#2d6a4f;--accent-l:#e8f4ee;--accent-d:#52b788;
@@ -23,7 +22,7 @@
   }
   html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
 
-  /* HEADER */
+  /* ── HEADER ── */
   header{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-sm)}
   .h-left{display:flex;align-items:center;gap:.75rem}
   .logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
@@ -34,22 +33,35 @@
   .score-value{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
   .score-value.bump{transform:scale(1.3)}
 
-  /* MAIN */
+  /* ── FILTER BAR ── */
+  .filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+  .filter-label{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);white-space:nowrap}
+  .filter-tags{display:flex;flex-wrap:wrap;gap:.4rem}
+  .ftag{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:500;background:var(--bg);border:1.5px solid var(--border);border-radius:100px;padding:.25rem .75rem;cursor:pointer;color:var(--text-2);transition:border-color .15s,background .15s,color .15s;user-select:none}
+  .ftag:hover{border-color:var(--border-strong);color:var(--text)}
+  .ftag.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .filter-clear{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;background:transparent;border:none;color:var(--text-3);cursor:pointer;padding:.25rem .5rem;border-radius:var(--rs);transition:color .15s,background .15s;display:none}
+  .filter-clear:hover{color:var(--text);background:var(--bg)}
+  .filter-clear.visible{display:block}
+
+  /* ── MAIN ── */
   main{padding:2rem;max-width:1600px;margin:0 auto}
   .cat-section{margin-bottom:2.5rem}
+  .cat-section.hidden{display:none}
   .cat-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1rem}
   .cat-name{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
   .cat-line{flex:1;height:1px;background:var(--border)}
   .cat-count{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-3)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.750rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
 
-  /* CARD — always clickable, solved cards get green treatment */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;aspect-ratio:2/1 ;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
+  /* ── CARD ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;aspect-ratio:2/1;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s,opacity .15s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong);transition:background .2s}
   .card:hover{border-color:var(--border-strong);box-shadow:var(--sh-md);transform:translateY(-1px)}
   .card.solved{background:var(--solved);border-color:var(--solved-b)}
   .card.solved::before{background:var(--accent-d)}
   .card.solved:hover{border-color:var(--accent-d)}
+  .card.tag-hidden{opacity:.25;pointer-events:none}
   .card-name{font-size:.825rem;font-weight:500;color:var(--text);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card.solved .card-name{color:var(--solved-t)}
   .card-pts{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text-3)}
@@ -57,117 +69,28 @@
   .solved-icon{position:absolute;top:.5rem;right:.5rem;width:16px;height:16px;opacity:0;transition:opacity .3s}
   .card.solved .solved-icon{opacity:1}
 
-  /* MODAL */
-  .overlay{
-  position:fixed;inset:0;z-index:100;
-  background:rgba(20,18,16,.45);
-  backdrop-filter:blur(6px); /* 4px → 6px */
-  display:flex;align-items:center;justify-content:center;
-  padding:1.5rem; /* 1rem → 1.5rem */
-  opacity:0;pointer-events:none;
-  transition:opacity .2s
-}
-.overlay.open{opacity:1;pointer-events:all}
+  /* no-results notice */
+  .no-results{font-size:.85rem;color:var(--text-3);padding:.5rem 0;display:none}
+  .no-results.visible{display:block}
 
-.modal{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:21px; /* 14px → 21px */
-  box-shadow:var(--sh-lg);
-  width:100%;
-  max-width:720px; /* 480px → 720px */
-  padding:3rem; /* 2rem → 3rem */
-  transform:translateY(18px) scale(.98); /* 12px → 18px */
-  transition:transform .25s cubic-bezier(.34,1.3,.64,1);
-  position:relative
-}
-.overlay.open .modal{transform:translateY(0) scale(1)}
+  /* ── LOADING / ERROR ── */
+  #loadState{display:flex;align-items:center;justify-content:center;min-height:40vh;font-size:.9rem;color:var(--text-3)}
 
-.m-close{
-  position:absolute;
-  top:1.5rem;right:1.5rem; /* 1rem → 1.5rem */
-  width:42px;height:42px; /* 28px → 42px */
-  border:1px solid var(--border);
-  background:transparent;
-  border-radius:var(--rs);
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--text-3);
-  transition:background .15s,color .15s
-}
-.m-close:hover{background:var(--bg);color:var(--text)}
-.m-close svg{width:21px;height:21px} /* 14px → 21px */
-
-.m-tag{
-  display:inline-block;
-  font-size:.975rem; /* .65 → ~.975 */
-  font-weight:600;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  color:var(--accent);
-  background:var(--accent-l);
-  border:1px solid var(--solved-b);
-  border-radius:100px;
-  padding:.3rem .9rem; /* scaled */
-  margin-bottom:1.125rem /* .75 → 1.125 */
-}
-
-.m-title{
-  font-size:1.875rem; /* 1.25 → 1.875 */
-  font-weight:600;
-  letter-spacing:-.02em;
-  margin-bottom:.375rem
-}
-
-.m-pts{
-  font-family:'DM Mono',monospace;
-  font-size:1.2rem; /* .8 → 1.2 */
-  color:var(--text-3);
-  margin-bottom:1.875rem
-}
-
-.m-hr{
-  height:1.5px; /* 1px → 1.5px */
-  background:var(--border);
-  margin-bottom:1.875rem
-}
-
-.m-meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:.75rem; /* .5 → .75 */
-  margin-bottom:1.5rem
-}
-
-.meta-chip{
-  font-family:'DM Mono',monospace;
-  font-size:1.05rem; /* .7 → ~1.05 */
-  font-weight:500;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:var(--rs);
-  padding:.375rem .9rem;
-  color:var(--text-2)
-}
-
-.m-desc{
-  font-size:.875rem; /* .875 → ~1.31 */
-  color:var(--text-2);
-  line-height:1.65;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:1.3125rem 1.5rem;
-  margin-bottom:1.875rem;
-  min-height:120px; /* 80 → 120 */
-  white-space:pre-wrap;
-  text-align:center;        /* centers text horizontally */
-  display:flex;             /* enables vertical centering */
-  align-items:center;       /* vertical center */
-  justify-content:center;   /* horizontal center */
-}
-
-  /* UNSOLVED: answer input */
+  /* ── MODAL ── */
+  .overlay{position:fixed;inset:0;z-index:100;background:rgba(20,18,16,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:21px;box-shadow:var(--sh-lg);width:100%;max-width:720px;padding:3rem;transform:translateY(18px) scale(.98);transition:transform .25s cubic-bezier(.34,1.3,.64,1);position:relative;max-height:90vh;overflow-y:auto}
+  .overlay.open .modal{transform:translateY(0) scale(1)}
+  .m-close{position:absolute;top:1.5rem;right:1.5rem;width:42px;height:42px;border:1px solid var(--border);background:transparent;border-radius:var(--rs);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:background .15s,color .15s}
+  .m-close:hover{background:var(--bg);color:var(--text)}
+  .m-close svg{width:21px;height:21px}
+  .m-tag{display:inline-block;font-size:.975rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid var(--solved-b);border-radius:100px;padding:.3rem .9rem;margin-bottom:1.125rem}
+  .m-title{font-size:1.875rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.375rem}
+  .m-pts{font-family:'DM Mono',monospace;font-size:1.2rem;color:var(--text-3);margin-bottom:1.875rem}
+  .m-hr{height:1.5px;background:var(--border);margin-bottom:1.875rem}
+  .m-meta{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem}
+  .meta-chip{font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:.375rem .9rem;color:var(--text-2)}
+  .m-desc{font-size:.875rem;color:var(--text-2);line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:1.3125rem 1.5rem;margin-bottom:1.875rem;min-height:120px;white-space:pre-wrap;text-align:center;display:flex;align-items:center;justify-content:center}
   .ans-section label{display:block;font-size:.75rem;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem}
   .ans-row{display:flex;gap:.5rem}
   .ans-input{flex:1;font-family:'DM Mono',monospace;font-size:.85rem;border:1px solid var(--border);border-radius:var(--rs);padding:.6rem .875rem;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
@@ -179,8 +102,6 @@
   .sub-btn:active{transform:scale(.97)}
   .fb{font-size:.78rem;margin-top:.5rem;min-height:1.1em;font-weight:500}
   .fb.ok{color:var(--accent)}.fb.bad{color:var(--danger)}
-
-  /* SOLVED: timestamp display + locked submit */
   .solved-ts-box{background:var(--solved);border:1px solid var(--solved-b);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:1rem}
   .solved-ts-label{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
   .solved-ts-value{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--solved-t)}
@@ -188,7 +109,7 @@
   .sub-btn-locked:hover{background:var(--border)}
   .fb-already{font-size:.78rem;margin-top:.5rem;min-height:1.1em;font-weight:500;color:var(--text-3);text-align:center}
 
-  /* TOAST */
+  /* ── TOAST ── */
   .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:.82rem;font-weight:500;padding:.6rem 1.2rem;border-radius:100px;z-index:200;opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.34,1.4,.64,1);pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -198,6 +119,7 @@
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
   <div class="h-left">
     <div class="logo">
@@ -213,7 +135,17 @@
   </div>
 </header>
 
-<main id="boardMain"></main>
+<!-- FILTER BAR (populated after data loads) -->
+<div class="filter-bar" id="filterBar" style="display:none">
+  <span class="filter-label">Filter by tag</span>
+  <div class="filter-tags" id="filterTags"></div>
+  <button class="filter-clear" id="filterClear">Clear filters</button>
+</div>
+
+<!-- BOARD -->
+<main id="boardMain">
+  <div id="loadState">Loading challenges…</div>
+</main>
 
 <!-- CHALLENGE MODAL -->
 <div class="overlay" id="playOverlay">
@@ -225,11 +157,10 @@
     <div class="m-title" id="mTitle"></div>
     <div class="m-pts" id="mPts"></div>
     <div class="m-hr"></div>
-    <!-- Tags rendered dynamically (1 to 5) -->
     <div class="m-meta" id="mMeta"></div>
     <div class="m-desc" id="mDesc"></div>
 
-    <!-- UNSOLVED: flag input -->
+    <!-- unsolved -->
     <div class="ans-section" id="ansSection">
       <label>Flag / Answer</label>
       <div class="ans-row">
@@ -239,7 +170,7 @@
       <div class="fb" id="fb"></div>
     </div>
 
-    <!-- SOLVED: timestamp + locked submit -->
+    <!-- solved -->
     <div id="solvedSection" style="display:none">
       <div class="solved-ts-box">
         <div class="solved-ts-label">Solved on</div>
@@ -248,210 +179,37 @@
       <button class="sub-btn-locked" id="alreadyBtn">Submit</button>
       <div class="fb-already" id="fbAlready"></div>
     </div>
-
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ════════════════════════════════════════════════════════════════
-   SHA-256 — answers stored as hashes only, plaintext discarded.
-   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   SHA-256
+   ════════════════════════════════════════════════════════ */
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-/* ════════════════════════════════════════════════════════════════
-   CHALLENGE DATA  ← EDIT YOUR CHALLENGES HERE
-   ────────────────────────────────────────────────────────────────
-   Fields:
-     name        — display name on card and modal
-     points      — integer point value
-     tags        — ARRAY of 1 to 5 strings (chips shown in modal)
-                   Examples:
-                     tags:['DF']                       ← single tag
-                     tags:['Medium','DF','AK']         ← three tags
-                     tags:['Hard','DF','AK','SK','JL'] ← five tags
-     description — challenge prompt shown in modal
-     answer      — PLAINTEXT flag (hashed on page load, never stored)
-   ════════════════════════════════════════════════════════════════ */
-const CHALLENGE_DATA = {
-  'Cryptography': [
-    { name:'Back To The Basics',           points:25,  tags:['DF'],        description:'Can you solve this?\n"}1egnellahc{SCHW"',                                                                                                  answer:'WHCS{challenge1}' },
-    { name:'Is Julius Caesar The Best?',   points:50,  tags:['DF'],        description:'GRMC{Xkr, Tevsec Xyfkmrbyxy sc loddob}',                                                                                                   answer:'WHCS{Nah, Julius Novachrono is better}' },
-    { name:'First We Mine, Then We Craft', points:50,  tags:['DF'],        description:'My friend keeps asking me for a base stack, what does that mean?\n"V0hDU3s2NF9pc19vbmVfc3RhY2t9"',                                         answer:'WHCS{64_is_one_stack}' },
-    { name:'Weekly Wednesdays',            points:50, tags:['DF'],         description:'The son of a man of many, one might call Omni-Man. "⠺⠓⠉⠎{⠊⠋⠸⠓⠑⠸⠊⠎⠸⠊⠝⠧⠊⠝⠉⠊⠃⠇⠑⠸⠞⠓⠑⠝⠸⠺⠓⠽⠸⠉⠁⠝⠸⠊⠸⠎⠑⠑⠸⠓⠊⠍}"',                   answer: ['WHCS{If_He_Is_Invincible_Then_Why_Can_I_See_Him}','WHCS{IF_HE_IS_INVINCIBLE_THEN_WHY_CAN_I_SEE_HIM}',  'WHCS{ifheisinvinciblethenwhycaniseehim}',  'WHCS{IfHeIsInvincibleThenWhyCanISeeHim}',  'WHCS{if_he_is_invincible_then_why_can_i_see_him}']},
-    { name:'Cycles',                       points:75,  tags:['DF'],        description:'I can\'t stop spinning! I must\'ve rotated 47 times at least.\n"(wr$L`07bb`05`KKJN"',                                                      answer:'WHCS{1_f331_d1zzy}' },
-    { name:'Yuno Ball',                    points:100, tags:['DF'],        description:'What\'s this talk about the BlackBulls? Do you have a clue, Blaise de Vigenère? "XSCU{Diy_Qtxus_Cnywyc_Cwufrpc_Jh_Znlpmet}"',              answer:'WHCS{The_Fifth_Clover_Returns_In_October}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'Web Exploitation': [
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'Reverse Engineering': [
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'Forensics': [
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'Binary Exploitation': [
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'OSINT': [
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-  'Miscellaneous': [
-    { name:'Mods', points:10, tags:['AK'], description:'what is 79%4', answer:'WHCS{3}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-    { name:'temp', points:100, tags:['DF','AK'], description:'blank', answer:'WHCS{123}' },
-  ],
-};
-
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    RUNTIME STATE
-   ════════════════════════════════════════════════════════════════ */
-const challenges = {};
-let score = 0;
-let activePlay = null;
+   ════════════════════════════════════════════════════════ */
+const challenges = {};   // { category: [challenge, …] }
+let score       = 0;
+let activePlay  = null;
+let activeTags  = new Set();   // currently selected filter tags
 
-/* ════════════════════════════════════════════════════════════════
-   LOCALSTORAGE PERSISTENCE
-   whcs_score  — integer score
-   whcs_solved — JSON array of "category|index" strings
-   whcs_ts     — JSON object { "category|index": ISO timestamp }
-   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   LOCALSTORAGE — keyed by challenge name (stable across
+   JSON edits as long as names don't change)
+   ════════════════════════════════════════════════════════ */
 function saveProgress() {
   const solvedNames = [];
   const tsMap = {};
   Object.keys(challenges).forEach(cat => {
-    challenges[cat].forEach((ch, i) => {
+    challenges[cat].forEach(ch => {
       if (ch.solved) {
         const key = `${cat}|${ch.name}`;
         solvedNames.push(key);
@@ -473,56 +231,142 @@ function loadProgress() {
   try { if (savedTs) tsMap = JSON.parse(savedTs); } catch(e) {}
   if (savedSolved) {
     try {
-      const ids = JSON.parse(savedSolved);
-      ids.forEach(id => {
-        const sep = id.lastIndexOf('|');
-        const cat = id.slice(0, sep);
-        const challengeName = id.slice(sep + 1);
-        const challenge = challenges[cat]?.find(c => c.name === challengeName);
-        if (challenge) {
-          challenge.solved = true;
-          challenge.solvedAt = tsMap[id] || null;
-        }
+      JSON.parse(savedSolved).forEach(id => {
+        const sep  = id.lastIndexOf('|');
+        const cat  = id.slice(0, sep);
+        const name = id.slice(sep + 1);
+        const ch   = challenges[cat]?.find(c => c.name === name);
+        if (ch) { ch.solved = true; ch.solvedAt = tsMap[id] || null; }
       });
     } catch(e) {}
   }
   document.getElementById('totalScore').textContent = score;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   INIT — hash answers, build state, restore saves, render
-   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   LOAD challenges.json, hash answers, restore saves
+   ════════════════════════════════════════════════════════ */
 async function init() {
-  for (const cat of Object.keys(CHALLENGE_DATA)) {
+  let rawData;
+  try {
+    const res = await fetch('challenges.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    rawData = await res.json();
+  } catch (err) {
+    document.getElementById('loadState').textContent =
+      `⚠ Could not load challenges.json — ${err.message}`;
+    return;
+  }
+
+  /* Hash every answer; plaintext lives only in rawData which
+     goes out of scope after this loop. */
+  for (const cat of Object.keys(rawData)) {
     challenges[cat] = [];
-    for (let i = 0; i < CHALLENGE_DATA[cat].length; i++) {
-      const src  = CHALLENGE_DATA[cat][i];
-     const hashes = Array.isArray(src.answer)
-      ? await Promise.all(src.answer.map(a => sha256(a)))
-      : [await sha256(src.answer)];
+    for (const src of rawData[cat]) {
+      const answers = Array.isArray(src.answer) ? src.answer : [src.answer];
+      const hashes  = await Promise.all(answers.map(a => sha256(a)));
       challenges[cat].push({
-        name:        src.name,
-        points:      src.points,
-        tags:        Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
-        description: src.description,
+        name:          src.name,
+        points:        src.points,
+        tags:          Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
+        description:   src.description,
         answerHashes:  hashes,
-        solved:      false,
-        solvedAt:    null,
+        solved:        false,
+        solvedAt:      null,
       });
     }
   }
+
   loadProgress();
+  buildFilterBar();
   renderBoard();
+  document.getElementById('loadState').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'flex';
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
+   FILTER BAR — collect all unique tags across every challenge
+   ════════════════════════════════════════════════════════ */
+function buildFilterBar() {
+  const allTags = new Set();
+  Object.values(challenges).forEach(list =>
+    list.forEach(ch => ch.tags.forEach(t => allTags.add(t)))
+  );
+
+  const container = document.getElementById('filterTags');
+  container.innerHTML = '';
+  [...allTags].sort().forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className   = 'ftag';
+    btn.textContent = tag;
+    btn.dataset.tag = tag;
+    btn.addEventListener('click', () => toggleFilter(tag));
+    container.appendChild(btn);
+  });
+}
+
+function toggleFilter(tag) {
+  if (activeTags.has(tag)) {
+    activeTags.delete(tag);
+  } else {
+    activeTags.add(tag);
+  }
+  /* update button states */
+  document.querySelectorAll('.ftag').forEach(btn => {
+    btn.classList.toggle('active', activeTags.has(btn.dataset.tag));
+  });
+  const clearBtn = document.getElementById('filterClear');
+  clearBtn.classList.toggle('visible', activeTags.size > 0);
+  applyFilter();
+}
+
+document.getElementById('filterClear').addEventListener('click', () => {
+  activeTags.clear();
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('active'));
+  document.getElementById('filterClear').classList.remove('visible');
+  applyFilter();
+});
+
+/* Show/hide cards and whole sections based on active tags.
+   A card matches if it has ALL active tags (AND logic). */
+function applyFilter() {
+  const main = document.getElementById('boardMain');
+  let anyVisible = false;
+
+  main.querySelectorAll('.cat-section').forEach(sec => {
+    let sectionHasVisible = false;
+    sec.querySelectorAll('.card').forEach(card => {
+      const cardTags = JSON.parse(card.dataset.tags);
+      const matches  = activeTags.size === 0 ||
+                       [...activeTags].every(t => cardTags.includes(t));
+      card.classList.toggle('tag-hidden', !matches);
+      if (matches) { sectionHasVisible = true; anyVisible = true; }
+    });
+    sec.classList.toggle('hidden', !sectionHasVisible);
+  });
+
+  /* global no-results notice */
+  let notice = document.getElementById('noResults');
+  if (!notice) {
+    notice = document.createElement('p');
+    notice.id        = 'noResults';
+    notice.className = 'no-results';
+    notice.textContent = 'No challenges match the selected tags.';
+    main.appendChild(notice);
+  }
+  notice.classList.toggle('visible', !anyVisible && activeTags.size > 0);
+}
+
+/* ════════════════════════════════════════════════════════
    BOARD RENDER
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 function renderBoard() {
   const main = document.getElementById('boardMain');
-  main.innerHTML = '';
+  /* remove category sections but keep the load-state / no-results nodes */
+  main.querySelectorAll('.cat-section').forEach(n => n.remove());
+
   Object.keys(challenges).forEach(cat => {
-    const sec = document.createElement('section');
+    const sec    = document.createElement('section');
     sec.className = 'cat-section';
     const solved = challenges[cat].filter(c => c.solved).length;
     const total  = challenges[cat].length;
@@ -531,47 +375,53 @@ function renderBoard() {
       <div class="cat-line"></div>
       <span class="cat-count">${solved}/${total}</span>
     </div>`;
+
     const grid = document.createElement('div');
     grid.className = 'grid';
+
     challenges[cat].forEach(ch => {
       const card = document.createElement('div');
-      card.className = 'card' + (ch.solved ? ' solved' : '');
+      card.className    = 'card' + (ch.solved ? ' solved' : '');
+      card.dataset.tags = JSON.stringify(ch.tags); // used by applyFilter
       card.innerHTML = `
-        <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
         <div class="card-name">${ch.name}</div>
         <div class="card-pts">${ch.points} pts</div>`;
       card.addEventListener('click', () => openPlay(ch, cat));
       grid.appendChild(card);
     });
+
     sec.appendChild(grid);
-    main.appendChild(sec);
+    main.insertBefore(sec, main.querySelector('#noResults'));
   });
+
+  /* re-apply any active filters after a re-render */
+  if (activeTags.size > 0) applyFilter();
 }
 
-/* ════════════════════════════════════════════════════════════════
-   TIMESTAMP FORMATTER
-   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   TIMESTAMP
+   ════════════════════════════════════════════════════════ */
 function formatTs(isoStr) {
   if (!isoStr) return 'Unknown time';
-  const d = new Date(isoStr);
-  return d.toLocaleString(undefined, {
+  return new Date(isoStr).toLocaleString(undefined, {
     weekday:'short', year:'numeric', month:'short',
     day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'
   });
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    PLAY MODAL
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 function openPlay(ch, cat) {
   activePlay = { ch, cat };
-
   document.getElementById('mCat').textContent   = cat;
   document.getElementById('mTitle').textContent = ch.name;
   document.getElementById('mPts').textContent   = `${ch.points} points`;
   document.getElementById('mDesc').textContent  = ch.description;
 
-  // Render tags — 1 to 5, whatever is in the array
   const meta = document.getElementById('mMeta');
   meta.innerHTML = '';
   (ch.tags || []).forEach(t => {
@@ -595,7 +445,6 @@ function openPlay(ch, cat) {
     document.getElementById('ansInput').classList.remove('err');
     setTimeout(() => document.getElementById('ansInput').focus(), 250);
   }
-
   document.getElementById('playOverlay').classList.add('open');
 }
 
@@ -608,15 +457,13 @@ document.getElementById('playClose').addEventListener('click', closePlay);
 document.getElementById('playOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('playOverlay')) closePlay();
 });
-
-/* "Already answered" button */
 document.getElementById('alreadyBtn').addEventListener('click', () => {
   document.getElementById('fbAlready').textContent = 'You Already Answered This Question';
 });
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    SUBMIT
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
   const { ch } = activePlay;
@@ -625,10 +472,13 @@ document.getElementById('subBtn').addEventListener('click', async () => {
   const inp = document.getElementById('ansInput');
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
-  if (!ch.answerHashes || ch.answerHashes.length === 0) { fb.textContent = 'No answer set for this challenge yet.'; fb.className = 'fb bad'; return; }
+  if (!ch.answerHashes?.length) {
+    fb.textContent = 'No answer set for this challenge yet.';
+    fb.className   = 'fb bad';
+    return;
+  }
 
   const h = await sha256(raw);
-  // raw is a local variable — not stored anywhere after this point
   if (ch.answerHashes.includes(h)) {
     const now   = new Date().toISOString();
     ch.solved   = true;
@@ -641,7 +491,6 @@ document.getElementById('subBtn').addEventListener('click', async () => {
     setTimeout(() => el.classList.remove('bump'), 400);
     saveProgress();
 
-    // Transition to solved view within the modal
     document.getElementById('ansSection').style.display    = 'none';
     document.getElementById('solvedSection').style.display = 'block';
     document.getElementById('solvedTs').textContent        = formatTs(now);
@@ -664,9 +513,9 @@ function errShake(inp, fb, msg) {
   setTimeout(() => inp.classList.remove('err'), 500);
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    KEY SHORTCUTS
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePlay();
   if (e.key === 'Enter' && document.getElementById('playOverlay').classList.contains('open')) {
@@ -674,9 +523,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    TOAST
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 let toastT;
 function showToast(msg) {
   const t = document.getElementById('toast');
