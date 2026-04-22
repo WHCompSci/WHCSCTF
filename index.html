@@ -249,12 +249,12 @@ function loadProgress() {
 async function init() {
   let rawData;
   try {
-    const res = await fetch('challenges.json');
+    const res = await fetch('Challenges.json');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     rawData = await res.json();
   } catch (err) {
     document.getElementById('loadState').textContent =
-      `⚠ Could not load challenges.json — ${err.message}`;
+      `⚠ Could not load Challenges.json — ${err.message}`;
     return;
   }
 
