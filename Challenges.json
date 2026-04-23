@@ -22,7 +22,7 @@
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" }
   ],
   "Web Exploitation": [
-    { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
+    { "name": "Website Login", "points": 100, "tags": ["AK"], "description": "Can you figure out how to login to this website and get the Flag?", "answer": "WHCS{SQL_INJECTION_DETECTED}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection</title>
+</head>
+<body>
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Portal</title>
+</head>
+<body>
+    <h2>Secure Login</h2>
+
+    <form onsubmit="return checkLogin()">
+        <label>Username:</label><br>
+        <input type="text" id="username"><br><br>
+
+        <label>Password:</label><br>
+        <input type="password" id="password"><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        function checkLogin() {
+            let user = document.getElementById("username").value;
+            let pass = document.getElementById("password").value;
+
+            // Simulate SQL injection detection
+            if (pass.includes("'") || pass.toLowerCase().includes("or")) {
+                document.getElementById("message").innerHTML =
+                    "Welcome admin! <br>FLAG: WHCS{SQL_INJECTION_DETECTED}";
+            } else {
+                document.getElementById("message").innerText =
+                    "Invalid credentials";
+            }
+
+            return false; // prevent page reload
+        }
+    </script>
+</body>
+
+<style>
+
+</style>
+
+</html>
+
+
+    
+
+    
+</html>
+
