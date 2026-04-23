@@ -142,6 +142,7 @@
             // Find the challenge whose path points to this page
             let targetChallenge = null;
             for (const cat of Object.values(data)) {
+                console.log("RAW DATA:", data);
                 const found = cat.find(ch =>
                     ch.path && (
                         ch.name === "Website Login"
