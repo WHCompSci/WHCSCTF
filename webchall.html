@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Portal</title>
     <style>
-        /* Add your styles here so it matches your main board! */
-        body { font-family: 'DM Sans', sans-serif; padding: 2rem; background: #f4f3ef; }
+        body { font-family: 'DM Sans', sans-serif; background: #f4f3ef; padding: 2rem; color: #1a1917; }
+        .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 2rem; border-radius: 10px; border: 1px solid #e2e0d8; }
+        input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #c8c5b8; border-radius: 4px; }
+        button { background: #2d6a4f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h2>Secure Login</h2>
 
+<div class="container">
+    <h2>Secure Login</h2>
     <form onsubmit="return checkLogin()">
         <label>Username:</label><br>
         <input type="text" id="username"><br><br>
@@ -19,49 +22,55 @@
         <input type="password" id="password"><br><br>
         <button type="submit">Login</button>
     </form>
-
     <p id="message"></p>
+</div>
 
-    <script>
-        async function sha256(str) {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-        }
+<script>
+    async function sha256(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
 
-        async function checkLogin() {
-            const pass = document.getElementById("password").value;
-            const msg = document.getElementById("message");
+    async function checkLogin() {
+        const pass = document.getElementById("password").value;
+        const msg = document.getElementById("message");
+        
+        try {
+            // Fetch the global challenges list from the root directory
+            const res = await fetch('../../Challenges.json');
+            const data = await res.json();
             
-            try {
-                // Ensure this path matches the location of your Challenges.json
-                const res = await fetch('../../Challenges.json');
-                const data = await res.json();
-                
-                let targetChallenge = null;
-                // Look through all categories for the challenge
-                for (const cat in data) {
-                    const found = data[cat].find(ch => ch.path && ch.path.includes("sqli"));
-                    if (found) { targetChallenge = found; break; }
-                }
+            // Find the challenge that corresponds to this file
+            let targetChallenge = null;
+            Object.values(data).forEach(cat => {
+                const found = cat.find(ch => ch.path && ch.path.includes("sqli"));
+                if (found) targetChallenge = found;
+            });
 
-                if (!targetChallenge) {
-                    msg.innerText = "Error: Challenge configuration not found.";
-                    return false;
-                }
-
-                const inputHash = await sha256(pass);
-                const correctHash = await sha256(targetChallenge.answer);
-
-                if (inputHash === correctHash) {
-                    msg.innerHTML = "<strong>Success!</strong><br>Flag: " + targetChallenge.answer;
-                } else {
-                    msg.innerText = "Invalid credentials";
-                }
-            } catch (e) {
-                msg.innerText = "Error loading challenge data.";
+            if (!targetChallenge) {
+                msg.innerText = "Error: Challenge configuration not found.";
+                return false;
             }
-            return false;
+
+            // SIMULATED SQL INJECTION LOGIC
+            // If the user inputs a common SQLi string, grant access
+            const isSQLi = pass.includes("'") || pass.toLowerCase().includes("or");
+            
+            // Verify against the actual hashed answer as a fallback
+            const inputHash = await sha256(pass);
+            const correctHash = await sha256(targetChallenge.answer);
+
+            if (isSQLi || inputHash === correctHash) {
+                msg.innerHTML = "<strong>Access Granted!</strong><br>Flag: " + targetChallenge.answer;
+            } else {
+                msg.innerText = "Invalid credentials";
+            }
+        } catch (e) {
+            msg.innerText = "Error loading challenge data.";
         }
-    </script>
+        
+        return false;
+    }
+</script>
 </body>
 </html>
