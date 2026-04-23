@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Injection</title>
-</head>
-<body>
-   <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Portal</title>
+    <style>
+        /* Add your styles here so it matches your main board! */
+        body { font-family: 'DM Sans', sans-serif; padding: 2rem; background: #f4f3ef; }
+    </style>
 </head>
 <body>
     <h2>Secure Login</h2>
@@ -19,43 +15,53 @@
     <form onsubmit="return checkLogin()">
         <label>Username:</label><br>
         <input type="text" id="username"><br><br>
-
         <label>Password:</label><br>
         <input type="password" id="password"><br><br>
-
         <button type="submit">Login</button>
     </form>
 
     <p id="message"></p>
 
     <script>
-        function checkLogin() {
-            let user = document.getElementById("username").value;
-            let pass = document.getElementById("password").value;
+        async function sha256(str) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
 
-            // Simulate SQL injection detection
-            if (pass.includes("'") || pass.toLowerCase().includes("or")) {
-                document.getElementById("message").innerHTML =
-                    "Welcome admin! <br>FLAG: WHCS{SQL_INJECTION_DETECTED}";
-            } else {
-                document.getElementById("message").innerText =
-                    "Invalid credentials";
+        async function checkLogin() {
+            const pass = document.getElementById("password").value;
+            const msg = document.getElementById("message");
+            
+            try {
+                // Ensure this path matches the location of your Challenges.json
+                const res = await fetch('../../Challenges.json');
+                const data = await res.json();
+                
+                let targetChallenge = null;
+                // Look through all categories for the challenge
+                for (const cat in data) {
+                    const found = data[cat].find(ch => ch.path && ch.path.includes("sqli"));
+                    if (found) { targetChallenge = found; break; }
+                }
+
+                if (!targetChallenge) {
+                    msg.innerText = "Error: Challenge configuration not found.";
+                    return false;
+                }
+
+                const inputHash = await sha256(pass);
+                const correctHash = await sha256(targetChallenge.answer);
+
+                if (inputHash === correctHash) {
+                    msg.innerHTML = "<strong>Success!</strong><br>Flag: " + targetChallenge.answer;
+                } else {
+                    msg.innerText = "Invalid credentials";
+                }
+            } catch (e) {
+                msg.innerText = "Error loading challenge data.";
             }
-
-            return false; // prevent page reload
+            return false;
         }
     </script>
 </body>
-
-<style>
-
-</style>
-
 </html>
-
-
-    
-
-    
-</html>
-
