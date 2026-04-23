@@ -6,6 +6,7 @@
     <title>Login Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:,">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -87,15 +88,14 @@
             border-radius: 6px;
             padding: .75rem 1rem;
         }
-        #message.bad {
-            color: #e63946;
-        }
+        #message.bad { color: #e63946; }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>🔒 Secure Login</h2>
-    <form onsubmit="return checkLogin()">
+    <!-- NO onsubmit here — handled in JS with e.preventDefault() -->
+    <form id="loginForm">
         <label for="username">Username</label>
         <input type="text" id="username" autocomplete="off" spellcheck="false">
 
@@ -113,40 +113,37 @@
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
 
-    async function checkLogin() {
+    // e.preventDefault() guarantees the page NEVER reloads,
+    // regardless of what happens inside the async function.
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
         const user = document.getElementById("username").value.trim();
         const pass = document.getElementById("password").value;
         const msg  = document.getElementById("message");
 
-        msg.className = '';
+        msg.className   = '';
         msg.textContent = '';
 
-        // Username must be admin — otherwise simulate a normal login failure
+        // Username must be "admin"
         if (user.toLowerCase() !== "admin") {
             msg.className   = 'bad';
             msg.textContent = "Invalid credentials";
-            return false;
+            return;
         }
 
-        // Simulate the SQL injection vulnerability:
-        // A classic payload like  ' OR '1'='1  or  ' OR 1=1--  bypasses the check
-        const isSQLi =
-            pass.includes("'") &&
-            /or\s+['"]?1['"]?\s*=\s*['"]?1/.test(pass.toLowerCase());
+        // Simulate SQL injection: a payload like  ' OR '1'='1  bypasses the password check
+        const isSQLi = pass.includes("'") && pass.toLowerCase().includes("or");
+
         try {
-            // Fetch flag from Challenges.json at the repo root (same level as this file)
             const res = await fetch('Challenges.json');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
 
-            // Find the challenge whose path points to this page
             let targetChallenge = null;
             for (const cat of Object.values(data)) {
-                console.log("RAW DATA:", data);
                 const found = cat.find(ch =>
-                    ch.path && (
-                        ch.name === "Website Login"
-                    )
+                    ch.path && (ch.path.includes("webchall") || ch.path.includes("sqli"))
                 );
                 if (found) { targetChallenge = found; break; }
             }
@@ -154,15 +151,14 @@
             if (!targetChallenge) {
                 msg.className   = 'bad';
                 msg.textContent = "Error: Challenge configuration not found.";
-                return false;
+                return;
             }
 
-            // Also allow the actual flag as a valid password (hash comparison — no plaintext in source)
+            // Also accept the real flag typed as the password (hash-compared, never plaintext in source)
             const inputHash   = await sha256(pass);
             const correctHash = await sha256(targetChallenge.answer);
-            const isCorrectPw = inputHash === correctHash;
 
-            if (isSQLi || isCorrectPw) {
+            if (isSQLi || inputHash === correctHash) {
                 msg.className = 'ok';
                 msg.innerHTML = `<strong>Access Granted!</strong><br>Flag: <code>${targetChallenge.answer}</code>`;
             } else {
@@ -170,13 +166,11 @@
                 msg.textContent = "Invalid credentials";
             }
 
-        } catch (e) {
+        } catch (err) {
             msg.className   = 'bad';
             msg.textContent = "Error loading challenge data.";
         }
-
-        return false;
-    }
+    });
 </script>
 </body>
 </html>
