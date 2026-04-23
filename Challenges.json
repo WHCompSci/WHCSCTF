@@ -22,7 +22,7 @@
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" }
   ],
   "Web Exploitation": [
-    { "name": "Website Login", "points": 100, "tags": ["AK"], "description": "Can you figure out how to login to this website and get the Flag?", "answer": "WHCS{SQL_INJECTION_DETECTED}" },
+    { "name": "Website Login", "points": 100, "tags": ["AK"], "description": "Can you figure out how to login to this website and get the Flag? \n\"https://whcompsci.github.io/WHCSCTF/webchall.html\"", "answer": "WHCS{SQL_INJECTION_DETECTED}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "Yes Sir", "points": 300, "tags": ["DF","Cyber1"], "description": "My boss needs me to find an old unredacted nuclear fission file from the UK government, he mentioned something about two main waste sources and said something about some type of pool being the site. I need to find this file or I'm going to be fired, can you help me? The form for the answer is going to be the waste stream ID followed by the total waste volume in liters. For example if the waste stream ID was 1B34 and the waste volume was 567 liters the answer would be WHCS{1B34567}. (The file may not contain the waste volume in liters and you may have to convert it)", "answer": "WHCS{3K321200}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
