@@ -130,8 +130,9 @@
 
         // Simulate the SQL injection vulnerability:
         // A classic payload like  ' OR '1'='1  or  ' OR 1=1--  bypasses the check
-        const isSQLi = pass.includes("'") || pass.toLowerCase().includes(" or ");
-
+        const isSQLi =
+            pass.includes("'") &&
+            /or\s+['"]?1['"]?\s*=\s*['"]?1/.test(pass.toLowerCase());
         try {
             // Fetch flag from Challenges.json at the repo root (same level as this file)
             const res = await fetch('Challenges.json');
@@ -143,8 +144,7 @@
             for (const cat of Object.values(data)) {
                 const found = cat.find(ch =>
                     ch.path && (
-                        ch.path.includes("webchall") ||
-                        ch.path.includes("sqli")
+                        ch.name === "Website Login"
                     )
                 );
                 if (found) { targetChallenge = found; break; }
