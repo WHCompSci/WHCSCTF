@@ -270,6 +270,7 @@ async function init() {
         points:        src.points,
         tags:          Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
         description:   src.description,
+        path:          src.path || null,
         answerHashes:  hashes,
         solved:        false,
         solvedAt:      null,
@@ -420,7 +421,19 @@ function openPlay(ch, cat) {
   document.getElementById('mCat').textContent   = cat;
   document.getElementById('mTitle').textContent = ch.name;
   document.getElementById('mPts').textContent   = `${ch.points} points`;
-  document.getElementById('mDesc').textContent  = ch.description;
+  const descEl = document.getElementById('mDesc');
+
+if (ch.path) {
+  descEl.innerHTML = `
+    ${ch.description}<br><br>
+    <a href="${ch.path}" target="_blank"
+       style="color: var(--accent); font-weight: 600;">
+       🔗 Open Challenge
+    </a>
+  `;
+} else {
+  descEl.textContent = ch.description;
+}
 
   const meta = document.getElementById('mMeta');
   meta.innerHTML = '';
