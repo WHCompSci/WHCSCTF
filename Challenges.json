@@ -66,7 +66,7 @@
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" }
   ],
   "Forensics": [
-    { "name": "Cyber Bee", "points": 50, "tags": ["DF","WHCS","Cyber1"], "description": "Do you think you could get the secret message in this image?", "image": "https://raw.githubusercontent.com/WHCompSci/WHCSCTF/main/images/bees.jpg", "answer": "WHCS{Onett_On_MountainTop}" },
+    { "name": "Cyber Bee", "points": 50, "tags": ["DF","CWK","Cyber1"], "description": "Do you think you could get the secret message in this image?", "image": "https://raw.githubusercontent.com/WHCompSci/WHCSCTF/main/images/bees.jpg", "answer": "WHCS{Onett_On_MountainTop}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
