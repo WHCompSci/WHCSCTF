@@ -430,37 +430,19 @@ function openPlay(ch, cat) {
         <img src="${ch.image}" 
             style="max-width:100%; max-height:250px; border-radius:10px; border:1px solid var(--border); box-shadow:var(--sh-sm);" />
         <div>${ch.description}</div>
-        ${ch.path ? `
-          <a href="${ch.path}" target="_blank"
-            style="color: var(--accent); font-weight: 600;">
-            🔗 Open Challenge
-          </a>
-        ` : ""}
+        ${ch.path ? `<a href="${ch.path}" target="_blank" style="color: var(--accent); font-weight: 600;">🔗 Open Challenge</a>` : ""}
       </div>
     `;
   } else if (ch.path) {
     descEl.innerHTML = `
       ${ch.description}<br><br>
-      <a href="${ch.path}" target="_blank"
-        style="color: var(--accent); font-weight: 600;">
+      <a href="${ch.path}" target="_blank" style="color: var(--accent); font-weight: 600;">
         🔗 Open Challenge
       </a>
     `;
   } else {
     descEl.textContent = ch.description;
   }
-
-if (ch.path) {
-  descEl.innerHTML = `
-    ${ch.description}<br><br>
-    <a href="${ch.path}" target="_blank"
-       style="color: var(--accent); font-weight: 600;">
-       🔗 Open Challenge
-    </a>
-  `;
-} else {
-  descEl.textContent = ch.description;
-}
 
   const meta = document.getElementById('mMeta');
   meta.innerHTML = '';
