@@ -1,4 +1,3 @@
 Vigenere: Ai seems to struggle with or without the key. key for yuno ball is BlackBulls
 Create a solving key for hard problems.
-Add tags for cyber1 or coding with kids to sort for in the future
-make a json file that contains data so you cant cheat by looking into the html
+Yes Sir document is "https://ukinventory.nda.gov.uk/wp-content/uploads/2023/01/3K32.pdf"
