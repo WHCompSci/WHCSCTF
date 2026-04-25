@@ -312,7 +312,6 @@
 
     footer span { color: var(--gold); }
 
-    /* Hidden from view but present in DOM as a red herring */
     .accessibility-skip {
       position: absolute;
       left: -9999px;
@@ -322,7 +321,6 @@
 </head>
 <body>
 
-  <!-- Red herring comment: not the flag -->
   <!-- site version: 2.4.1 | build: 20240415 -->
 
   <nav>
@@ -442,71 +440,74 @@
     &copy; 2024 <span>Flour & Stone Bakery</span>. All rights reserved. Made with flour, water, salt, and time.
   </footer>
 
-  <!-- 
+  <!--
     CTF HINT (visible in source): "The real secret isn't in the dough."
     Look somewhere else. Network tab, perhaps?
   -->
 
   <script>
-    // Register service worker to inject custom response headers
-    // This is where the CTF flag lives — in the network response headers
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-self.addEventListener('fetch', function(event) {
-  if (event.request.url.includes('ctf-challenge.html') || event.request.url.endsWith('/')) {
-    event.respondWith(
-      fetch(event.request).then(function(response) {
-        const newHeaders = new Headers(response.headers);
-        newHeaders.set('X-CTF-Flag', 'WHCS{h34d3rs_4r3_n0t_4s_h1dd3n_4s_y0u_th1nk}');
-        newHeaders.set('X-Hint', 'Nice work checking the network tab!');
-        newHeaders.set('X-Bakery-Secret', 'The starter is named Gerald.');
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: newHeaders
-        });
-      })
-    );
-  }
-});
-`;
+    (function () {
+      const _p = [
+        'U0NIVw==',   
+        'ezM0aDM=',   
+        'NHI0XzNy',   
+        'XzB0XzM0',   
+        'aDFkZDNu',   
+        'XzM0c180',  
+        'eTV5MHQ=',  
+        'XzF1MHQ=',   
+        'azFuaDF9',   
+      ];
 
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
+      function _d(s) {
+        return atob(s);
+      }
+      if ('serviceWorker' in navigator) {
+        const swSource = [
+          "const _f=function(){",
+          "const p=[",
+          _p.map(c => JSON.stringify(c)).join(','),
+          "];",
+          "const ord=[0,1,2,3,4,5,6,7,8];",
+          "return ord.map(i=>atob(p[i])).join('');",
+          "};",
+          "self.addEventListener('fetch',function(e){",
+          "const u=e.request.url;",
+          "if(u.includes('ctf-challenge')||u.endsWith('/')){",
+          "e.respondWith(fetch(e.request).then(function(r){",
+          "const h=new Headers(r.headers);",
+          "h.set('X-CTF-Flag',_f());",
+          "h.set('X-Hint','Nice work checking the network tab!');",
+          "h.set('X-Bakery-Secret','The starter is named Gerald.');",
+          "return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h});",
+          "}));}})"
+        ].join('');
 
-      navigator.serviceWorker.register(swUrl, { scope: './' })
-        .then(reg => {
-          // Service worker registered silently
-        })
-        .catch(() => {
-          // Fallback: flag is embedded in a meta tag as a second hiding spot
-        });
-    }
+        const blob = new Blob([swSource], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl, { scope: './' }).catch(() => {});
+      }
 
-    // Secondary approach: inject a custom header-like meta after load
-    // (Also hidden in an XHR request for extra network traffic to inspect)
-    window.addEventListener('load', function() {
-      // Make a small XHR to a fake internal endpoint with the flag in the request headers
-      // Players who watch ALL network requests will see this too
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', '#ctf-ping', true);
-      xhr.setRequestHeader('X-CTF-Flag', 'WHCS{h34d3rs_4r3_n0t_4s_h1dd3n_4s_y0u_th1nk}');
-      xhr.setRequestHeader('X-Challenge', 'Found it! Submit: WHCS{h34d3rs_4r3_n0t_4s_h1dd3n_4s_y0u_th1nk}');
+      window.addEventListener('load', function () {
+        (function () {
+          const parts = _p;
+          const flag  = parts.map(c => atob(c)).join('');
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', '#ctf-ping', true);
+          xhr.setRequestHeader('X-CTF-Flag', flag);
+          xhr.setRequestHeader('X-Challenge', 'Found it! Submit: ' + flag);
+          xhr.send();
 
-      // Also create a fetch() request with the flag in a custom header
-      fetch(window.location.href, {
-        method: 'HEAD',
-        headers: {
-          'X-CTF-Flag': 'WHCS{h34d3rs_4r3_n0t_4s_h1dd3n_4s_y0u_th1nk}',
-          'X-Hint': 'Check the request headers on this fetch call!'
-        }
-      }).catch(() => {});
-
-      // Create a named ping request visible in network tab
-      const img = new Image();
-      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-      img.dataset.flag = 'WHCS{h34d3rs_4r3_n0t_4s_h1dd3n_4s_y0u_th1nk}';
-    });
+          fetch(window.location.href, {
+            method: 'HEAD',
+            headers: {
+              'X-CTF-Flag': flag,
+              'X-Hint': 'Check the request headers on this fetch call!'
+            }
+          }).catch(() => {});
+        })();
+      });
+    })();
   </script>
 
 </body>
