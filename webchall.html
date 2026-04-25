@@ -136,7 +136,7 @@
         const isSQLi = pass.includes("'") && pass.toLowerCase().includes("or");
 
         try {
-            const res = await fetch("http://localhost:3000/api/challenges");
+            const res = await fetch("https://whcsctf-api.onrender.com");
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
 
