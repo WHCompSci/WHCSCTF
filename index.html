@@ -249,7 +249,7 @@ function loadProgress() {
 async function init() {
   let rawData;
   try {
-    const res = await fetch('Challenges.json');
+    const res = await fetch("http://localhost:3000/api/challenges");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     rawData = await res.json();
   } catch (err) {
