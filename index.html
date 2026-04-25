@@ -249,7 +249,7 @@ function loadProgress() {
 async function init() {
   let rawData;
   try {
-    const res = await fetch("https://whcsctf-api.onrender.com");
+    const res = await fetch("https://whcsctf-api.onrender.com/api/challenges");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     rawData = await res.json();
   } catch (err) {
