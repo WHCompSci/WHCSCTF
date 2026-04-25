@@ -5,19 +5,19 @@ const app = express();
 app.use(cors()); // allow your GitHub Pages frontend to call this
 
 app.use(express.json());
+const fs = require("fs");
+const path = require("path");
 
-// 🔒 Example: challenges endpoint (NO plaintext answers)
 app.get('/api/challenges', (req, res) => {
-  res.json({
-    Web: [
-      {
-        name: "Bakery Bread",
-        points: 100,
-        description: "Check the bakery site...",
-        path: "BakeryChallenge.html",
-        answerHash: "PUT_HASH_HERE"
-      }
-    ]
+  const filePath = path.join(__dirname, 'Challenges.json');
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to load challenges" });
+    }
+
+    res.json(JSON.parse(data));
   });
 });
 
