@@ -1,0 +1,26 @@
+{
+  "name": "whcsctf",
+  "version": "1.0.0",
+  "description": "Warren Hills Computer Science Advanced Topics \r Warren Hills Cyber Stars Capture The Flag \r Created by Alexander Kokinos and Dylan Fratella",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WHCompSci/WHCSCTF.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/WHCompSci/WHCSCTF/issues"
+  },
+  "homepage": "https://github.com/WHCompSci/WHCSCTF#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
