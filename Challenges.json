@@ -133,7 +133,7 @@
   ],
   "Miscellaneous": [
     { "name": "Mods", "points": 10, "tags": ["AK"], "description": "what is 79%4", "answer": "WHCS{3}" },
-    { "name": "Terminus", "points": 100, "tags": ["DF","CWK", "Cyber1"], "description": "Go to https://web.mit.edu/mprat/Public/web/Terminus/Web/main.html and make your way to the marketplace in the most effecient way possible. After moving to a new location use ls. Your answer is going to be the concatenation of the first letter of every word in a command. For example ls, cd EasternMountains, ls, cd Cave... up until you reach the Marketplace (cd Marketplace) would result in answer: WHCS{lcelcc......cm}", "answer": "WHCS{lcelcclcdlcdlmbslctlcslcplctlcm}" },
+    { "name": "Terminus", "points": 200, "tags": ["DF","CWK", "Cyber1"], "description": "Go to https://web.mit.edu/mprat/Public/web/Terminus/Web/main.html and make your way to the marketplace in the most effecient way possible. After moving to a new location use ls. Your answer is going to be the concatenation of the first letter of every word in a command. For example ls, cd EasternMountains, ls, cd Cave... up until you reach the Marketplace (cd Marketplace) would result in answer: WHCS{lcelcc......cm}", "answer": "WHCS{lcelcclcdlcdlmbslctlcslcplctlcm}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
     { "name": "temp", "points": 100, "tags": ["DF","AK"], "description": "blank", "answer": "WHCS{123}" },
