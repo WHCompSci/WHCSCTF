@@ -311,12 +311,6 @@
     }
 
     footer span { color: var(--gold); }
-
-    .accessibility-skip {
-      position: absolute;
-      left: -9999px;
-      font-size: 0px;
-    }
   </style>
 </head>
 <body>
@@ -441,73 +435,41 @@
   </footer>
 
   <!--
-    CTF HINT (visible in source): "The real secret isn't in the dough."
+    CTF HINT: "The real secret isn't in the dough."
     Look somewhere else. Network tab, perhaps?
   -->
 
   <script>
-    (function () {
-      const _p = [
-        'U0NIVw==',   
-        'ezM0aDM=',   
-        'NHI0XzNy',   
-        'XzB0XzM0',   
-        'aDFkZDNu',   
-        'XzM0c180',  
-        'eTV5MHQ=',  
-        'XzF1MHQ=',   
-        'azFuaDF9',   
-      ];
+    window.addEventListener('load', function () {
+      fetch("https://whcsctf-api-bdu8.onrender.com/api/bakery")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var flag = null;
+          var categories = Object.values(data);
+          for (var i = 0; i < categories.length; i++) {
+            var list = categories[i];
+            for (var j = 0; j < list.length; j++) {
+              if (list[j].name === 'Bakery Bread') {
+                flag = list[j].answer;
+                break;
+              }
+            }
+            if (flag) break;
+          }
 
-      function _d(s) {
-        return atob(s);
-      }
-      if ('serviceWorker' in navigator) {
-        const swSource = [
-          "const _f=function(){",
-          "const p=[",
-          _p.map(c => JSON.stringify(c)).join(','),
-          "];",
-          "const ord=[0,1,2,3,4,5,6,7,8];",
-          "return ord.map(i=>atob(p[i])).join('');",
-          "};",
-          "self.addEventListener('fetch',function(e){",
-          "const u=e.request.url;",
-          "if(u.includes('ctf-challenge')||u.endsWith('/')){",
-          "e.respondWith(fetch(e.request).then(function(r){",
-          "const h=new Headers(r.headers);",
-          "h.set('X-CTF-Flag',_f());",
-          "h.set('X-Hint','Nice work checking the network tab!');",
-          "h.set('X-Bakery-Secret','The starter is named Gerald.');",
-          "return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h});",
-          "}));}})"
-        ].join('');
-
-        const blob = new Blob([swSource], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl, { scope: './' }).catch(() => {});
-      }
-
-      window.addEventListener('load', function () {
-        (function () {
-          const parts = _p;
-          const flag  = parts.map(c => atob(c)).join('');
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', '#ctf-ping', true);
-          xhr.setRequestHeader('X-CTF-Flag', flag);
-          xhr.setRequestHeader('X-Challenge', 'Found it! Submit: ' + flag);
-          xhr.send();
+          if (!flag) return; 
 
           fetch(window.location.href, {
             method: 'HEAD',
             headers: {
-              'X-CTF-Flag': flag,
-              'X-Hint': 'Check the request headers on this fetch call!'
+              'X-CTF-Flag'  : flag,
+              'X-Hint'      : 'Nice work checking the network tab!',
+              'X-Bakery-Secret': 'The starter is named Gerald.'
             }
-          }).catch(() => {});
-        })();
-      });
-    })();
+          }).catch(function () {});
+        })
+        .catch(function () {});
+    });
   </script>
 
 </body>

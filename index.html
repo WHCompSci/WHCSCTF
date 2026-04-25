@@ -249,7 +249,7 @@ function loadProgress() {
 async function init() {
   let rawData;
   try {
-    const res = await fetch('Challenges.json');
+    const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     rawData = await res.json();
   } catch (err) {
@@ -266,15 +266,15 @@ async function init() {
       const answers = Array.isArray(src.answer) ? src.answer : [src.answer];
       const hashes  = await Promise.all(answers.map(a => sha256(a)));
       challenges[cat].push({
-        name:          src.name,
-        points:        src.points,
-        tags:          Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
-        description:   src.description,
-        path:          src.path || null,
-        image: src.image || null,
-        answerHashes:  hashes,
-        solved:        false,
-        solvedAt:      null,
+        name:         src.name,
+        points:       src.points,
+        tags:         Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
+        description:  src.description,
+        path:         src.path || null,
+        image:        src.image || null,
+        answerHashes: src.answerHashes || [],  // ← use what the server sent
+        solved:       false,
+        solvedAt:     null,
       });
     }
   }
