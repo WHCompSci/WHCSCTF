@@ -3,3 +3,7 @@ Create a solving key for hard problems.
 Yes Sir document is "https://ukinventory.nda.gov.uk/wp-content/uploads/2023/01/3K32.pdf"
 add a OSINT for the adress located on bakery website seton hall basketball. Adress: 90 Bleecker St New York
 render backend link: https://dashboard.render.com/web/srv-d7mgdrok1i2s7394s97g/events
+
+Attacker Spotted!:  Https request with length of 231
+On the uphill: go to DNS and recombine the base64 answer (the weird looking strings) then decode it.  V0hDU3tKSktfMTVfMHYzcnl0NzNkfQ\=\=  is WHCS{JJK_15_0v3ryt73d}
+On the downhill: Look at the ICMP and it is the combination of the non-noise ones. rearrange in order (annoying cause its leetcode)
