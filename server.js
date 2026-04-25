@@ -9,15 +9,36 @@ const fs = require("fs");
 const path = require("path");
 
 app.get('/api/challenges', (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
+  const crypto = require("crypto");
+
   const filePath = path.join(__dirname, 'Challenges.json');
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      console.error(err);
       return res.status(500).json({ error: "Failed to load challenges" });
     }
 
-    res.json(JSON.parse(data));
+    const raw = JSON.parse(data);
+
+    for (const cat of Object.keys(raw)) {
+      raw[cat] = raw[cat].map(ch => {
+        const answers = Array.isArray(ch.answer) ? ch.answer : [ch.answer];
+
+        const hashes = answers.map(a =>
+          crypto.createHash('sha256').update(a).digest('hex')
+        );
+
+        return {
+          ...ch,
+          answer: undefined,        // remove plaintext
+          answerHashes: hashes      // ✅ matches frontend
+        };
+      });
+    }
+
+    res.json(raw);
   });
 });
 
