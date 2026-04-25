@@ -441,7 +441,7 @@
 
   <script>
     window.addEventListener('load', function () {
-      fetch("http://localhost:3000/api/challenges")
+      fetch("https://whcsctf-api.onrender.com")
         .then(function (r) { return r.json(); })
         .then(function (data) {
           var flag = null;
