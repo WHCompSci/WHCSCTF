@@ -7,3 +7,53 @@ render backend link: https://dashboard.render.com/web/srv-d7mgdrok1i2s7394s97g/e
 Attacker Spotted!:  Https request with length of 231
 On the uphill: go to DNS and recombine the base64 answer (the weird looking strings) then decode it.  V0hDU3tKSktfMTVfMHYzcnl0NzNkfQ\=\=  is WHCS{JJK_15_0v3ryt73d}
 On the downhill: Look at the ICMP and it is the combination of the non-noise ones. rearrange in order (annoying cause its leetcode)
+
+
+
+
+
+
+
+
+Red Light Green Light python script:
+import time
+import numpy as np
+import mss
+import pyautogui
+
+pyautogui.PAUSE = 0
+pyautogui.FAILSAFE = False
+
+TARGET = np.array([0x01, 0x01, 0x3F], dtype=np.int16)  # BGR
+TOL = 10
+
+STEP = 3  # key speed boost
+
+def main():
+    time.sleep(1)
+
+    with mss.mss() as sct:
+        mon = sct.monitors[1]
+
+        while True:
+            img = np.array(sct.grab(mon), copy=False)
+
+            # direct BGR view (no slicing copy)
+            bgr = img[::STEP, ::STEP, :3].astype(np.int16)
+
+            # fast vectorized compare
+            diff = np.abs(bgr - TARGET)
+            mask = np.all(diff <= TOL, axis=2)
+
+            idx = np.flatnonzero(mask.ravel())
+            if idx.size:
+                h, w = mask.shape
+                i = idx[0]
+
+                y = (i // w) * STEP
+                x = (i % w) * STEP
+
+                pyautogui.click(x, y)
+
+if __name__ == "__main__":
+    main()
