@@ -472,5 +472,16 @@
     });
   </script>
 
+  <div id="comment"></div>
+
+<script>
+  const msg = new URLSearchParams(location.search).get("msg");
+
+  if (msg) {
+    document.getElementById("comment").innerHTML = msg;
+  }
+</script>
+
+
 </body>
 </html>
