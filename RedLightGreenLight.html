@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Red Light, Green Light — CTF Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #ff2222;
+      --red-glow: rgba(255,34,34,0.55);
+      --green: #00ff66;
+      --green-glow: rgba(0,255,102,0.55);
+      --bg: #080c0a;
+      --grid: rgba(0,255,102,0.04);
+      --panel: #0d1410;
+      --border: rgba(0,255,102,0.18);
+      --text: #c8ffd4;
+      --muted: #4a7a58;
+      --accent: #00ff66;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.07) 2px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Grid bg */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(8,12,10,0.98) 70%, transparent);
+      padding: 16px 32px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    .challenge-tag {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    #title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      text-shadow: 0 0 24px var(--green-glow), 0 0 60px rgba(0,255,102,0.2);
+    }
+
+    #timer-block { text-align: right; }
+
+    #timer-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: block;
+    }
+
+    #timer {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 12px var(--green-glow);
+    }
+
+    /* ── Status bar ── */
+    #status-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      background: linear-gradient(0deg, rgba(8,12,10,0.98) 70%, transparent);
+      padding: 16px 32px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    #progress-text {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+
+    #progress-text span { color: var(--accent); font-weight: bold; }
+
+    #progress-bar-wrap {
+      flex: 1;
+      margin: 0 28px;
+      height: 4px;
+      background: rgba(0,255,102,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow);
+      width: 0%;
+      transition: width 0.15s ease;
+      border-radius: 2px;
+    }
+
+    #hint-text {
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
+    /* ── Arena ── */
+    #arena {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+    }
+
+    /* ── Buttons ── */
+    .btn-node {
+      position: absolute;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 2px solid var(--red);
+      background: radial-gradient(circle at 35% 35%, #3a0000, #1a0000);
+      box-shadow: 0 0 14px var(--red-glow), inset 0 0 10px rgba(255,34,34,0.12);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--red);
+      text-shadow: 0 0 8px var(--red-glow);
+      user-select: none;
+      transform: translate(-50%, -50%);
+      transition: border-color 0.07s, box-shadow 0.07s, background 0.07s, color 0.07s;
+    }
+
+    .btn-node:hover {
+      box-shadow: 0 0 26px var(--red-glow), inset 0 0 16px rgba(255,34,34,0.22);
+      filter: brightness(1.18);
+    }
+
+    .btn-node.active {
+      border-color: var(--green) !important;
+      background: radial-gradient(circle at 35% 35%, #003a18, #001a0c) !important;
+      box-shadow: 0 0 28px var(--green-glow), inset 0 0 14px rgba(0,255,102,0.2) !important;
+      color: var(--green) !important;
+      text-shadow: 0 0 10px var(--green-glow) !important;
+      animation: pulse-green 0.35s ease;
+    }
+
+    .btn-node.active:hover { filter: brightness(1.15); }
+
+    @keyframes pulse-green {
+      0%   { transform: translate(-50%, -50%) scale(1); }
+      40%  { transform: translate(-50%, -50%) scale(1.2); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* ── Fail flash ── */
+    #fail-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,34,34,0.12);
+      pointer-events: none;
+      z-index: 400;
+      opacity: 0;
+      transition: opacity 0.08s;
+    }
+    #fail-flash.show { opacity: 1; }
+
+    /* ── Splash ── */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,10,0.97);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.4rem;
+    }
+
+    #splash-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.2rem;
+      letter-spacing: 0.12em;
+      color: var(--red);
+      text-shadow: 0 0 30px var(--red-glow);
+    }
+
+    .rule-list {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      line-height: 2.2;
+      list-style: none;
+      text-align: left;
+    }
+
+    .rule-list li::before { content: '▸ '; color: var(--red); }
+    .rule-list em { color: var(--text); font-style: normal; }
+
+    #start-btn {
+      margin-top: 0.6rem;
+      background: transparent;
+      border: 2px solid var(--red);
+      color: var(--red);
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.85rem 2.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-shadow: 0 0 8px var(--red-glow);
+      box-shadow: 0 0 16px var(--red-glow);
+    }
+
+    #start-btn:hover {
+      background: rgba(255,34,34,0.1);
+      box-shadow: 0 0 30px var(--red-glow);
+    }
+
+    /* ── Win overlay ── */
+    #win-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.93);
+      z-index: 500;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    #win-overlay.show { display: flex; }
+
+    #win-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.8rem;
+      color: var(--green);
+      text-shadow: 0 0 40px var(--green-glow), 0 0 80px rgba(0,255,102,0.25);
+      letter-spacing: 0.1em;
+      animation: flicker 2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 88% { opacity: 1; }
+      90% { opacity: 0.82; }
+      93% { opacity: 1; }
+      97% { opacity: 0.88; }
+      100% { opacity: 1; }
+    }
+
+    #flag-box {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 1.2rem 2.5rem;
+      text-align: center;
+      min-width: 340px;
+    }
+
+    #flag-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    #flag-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.05rem;
+      color: var(--green);
+      text-shadow: 0 0 8px var(--green-glow);
+      letter-spacing: 0.04em;
+    }
+
+    #win-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    #restart-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.6rem 1.8rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    #restart-btn:hover { color: var(--green); border-color: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- ── Splash ── -->
+<div id="splash">
+  <div id="splash-title">RED LIGHT, GREEN LIGHT</div>
+  <ul class="rule-list">
+    <li>12 buttons are scattered across the screen</li>
+    <li>Press <em>ALL 12</em> so they are <em>simultaneously</em> green</li>
+    <li>Each button stays green for only <em>1 second</em> after being pressed</li>
+    <li>Every second, all buttons <em>teleport</em> to new random positions</li>
+    <li>A button's individual timer is <em>unaffected</em> by teleports</li>
+    <li>Get all 12 green at the same time to capture the flag</li>
+  </ul>
+  <button id="start-btn" onclick="startGame()">INITIALIZE</button>
+</div>
+
+<!-- ── Fail flash ── -->
+<div id="fail-flash"></div>
+
+<!-- ── Button arena ── -->
+<div id="arena"></div>
+
+<!-- ── Header ── -->
+<div id="header">
+  <span class="challenge-tag">CTF // Web</span>
+  <div id="title">Red Light, Green Light</div>
+  <div id="timer-block">
+    <span id="timer-label">Teleport in</span>
+    <span id="timer">1.0s</span>
+  </div>
+</div>
+
+<!-- ── Status bar ── -->
+<div id="status-bar">
+  <div id="progress-text">ACTIVE: <span id="active-count">0</span> / 12</div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="hint-text">ALL GREEN TO CAPTURE FLAG</div>
+</div>
+
+<!-- ── Win overlay ── -->
+<div id="win-overlay">
+  <div id="win-title">ACCESS GRANTED</div>
+  <div id="flag-box">
+    <div id="flag-label">Flag</div>
+    <div id="flag-value">connecting to server…</div>
+  </div>
+  <div id="win-sub">All 12 nodes activated simultaneously</div>
+  <button id="restart-btn" onclick="restartGame()">↺ Reset Challenge</button>
+</div>
+
+<script>
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  CONFIG — adjust as needed
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const BUTTON_COUNT     = 12;
+  const BUTTON_ACTIVE_MS = 1000;   // ← ms each button stays green after click
+  const TELEPORT_EVERY   = 1000;   // ← ms between teleports
+
+  const BTN_RADIUS       = 34;     // half button size in px (for collision math)
+  const MIN_DIST         = BTN_RADIUS * 2 + 18; // min center-to-center distance
+  const MAX_PLACE_TRIES  = 300;    // placement attempts before fallback
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  const HEADER_CLEAR = 76;   // px reserved at top
+  const FOOTER_CLEAR = 58;   // px reserved at bottom
+  const SIDE_PAD     = BTN_RADIUS + 10;
+
+  const arena       = document.getElementById('arena');
+  const activeCount = document.getElementById('active-count');
+  const progressBar = document.getElementById('progress-bar');
+  const timerEl     = document.getElementById('timer');
+  const winOverlay  = document.getElementById('win-overlay');
+  const flagValue   = document.getElementById('flag-value');
+  const failFlash   = document.getElementById('fail-flash');
+
+  let buttons      = [];   // DOM nodes
+  let positions    = [];   // { x, y } — center coords
+  let activeTimers = [];   // per-button deactivation timer IDs
+  let teleportInt  = null;
+  let tickInt      = null;
+  let msUntilTele  = TELEPORT_EVERY;
+  let gameRunning  = false;
+  let wonAlready   = false;
+
+  // ── Collision-aware random position ───────────────────────────────────────
+  function randomPos(existing) {
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const xMin = SIDE_PAD,        xMax = W - SIDE_PAD;
+    const yMin = HEADER_CLEAR + BTN_RADIUS;
+    const yMax = H - FOOTER_CLEAR - BTN_RADIUS;
+
+    for (let t = 0; t < MAX_PLACE_TRIES; t++) {
+      const x = xMin + Math.random() * (xMax - xMin);
+      const y = yMin + Math.random() * (yMax - yMin);
+      let ok = true;
+      for (const p of existing) {
+        const dx = x - p.x, dy = y - p.y;
+        if (dx * dx + dy * dy < MIN_DIST * MIN_DIST) { ok = false; break; }
+      }
+      if (ok) return { x, y };
+    }
+    // Fallback — just place it (rare, only if screen too small)
+    return {
+      x: xMin + Math.random() * (xMax - xMin),
+      y: yMin + Math.random() * (yMax - yMin)
+    };
+  }
+
+  function moveBtn(btn, pos) {
+    btn.style.left = pos.x + 'px';
+    btn.style.top  = pos.y + 'px';
+  }
+
+  // ── Build buttons ─────────────────────────────────────────────────────────
+  function buildButtons() {
+    arena.innerHTML = '';
+    buttons      = [];
+    positions    = [];
+    activeTimers = [];
+
+    for (let i = 0; i < BUTTON_COUNT; i++) {
+      const pos = randomPos(positions);
+      positions.push(pos);
+
+      const btn = document.createElement('div');
+      btn.className         = 'btn-node';
+      btn.textContent       = (i + 1).toString().padStart(2, '0');
+      btn.dataset.index     = i;
+      moveBtn(btn, pos);
+
+      btn.addEventListener('click', () => handleClick(i));
+      arena.appendChild(btn);
+      buttons.push(btn);
+      activeTimers.push(null);
+    }
+  }
+
+  // ── Click handler ─────────────────────────────────────────────────────────
+  function handleClick(i) {
+    if (!gameRunning) return;
+    const btn = buttons[i];
+
+    // Clear any existing deactivation timer for this button
+    if (activeTimers[i] !== null) {
+      clearTimeout(activeTimers[i]);
+      activeTimers[i] = null;
+    }
+
+    // Activate (add class if not already there)
+    btn.classList.add('active');
+
+    // Schedule deactivation — independent of teleports
+    activeTimers[i] = setTimeout(() => {
+      btn.classList.remove('active');
+      activeTimers[i] = null;
+      updateProgress();
+    }, BUTTON_ACTIVE_MS);
+
+    updateProgress();
+  }
+
+  // ── Progress / win check ──────────────────────────────────────────────────
+  function updateProgress() {
+    const active = buttons.filter(b => b.classList.contains('active')).length;
+    activeCount.textContent = active;
+    progressBar.style.width = (active / BUTTON_COUNT * 100) + '%';
+
+    if (active === BUTTON_COUNT && !wonAlready) {
+      wonAlready = true;
+      triggerWin();
+    }
+  }
+
+  // ── Teleport — only moves buttons, never touches timers ───────────────────
+  function teleportAll() {
+    const newPos = [];
+    buttons.forEach((btn, i) => {
+      const pos = randomPos(newPos);
+      newPos.push(pos);
+      positions[i] = pos;
+      moveBtn(btn, pos);
+      // active state and timer are intentionally untouched
+    });
+
+    failFlash.classList.add('show');
+    setTimeout(() => failFlash.classList.remove('show'), 110);
+
+    msUntilTele = TELEPORT_EVERY;
+  }
+
+  // ── Countdown display ─────────────────────────────────────────────────────
+  function startTick() {
+    const TICK = 50;
+    msUntilTele = TELEPORT_EVERY;
+    tickInt = setInterval(() => {
+      msUntilTele = Math.max(0, msUntilTele - TICK);
+      timerEl.textContent = (msUntilTele / 1000).toFixed(1) + 's';
+    }, TICK);
+  }
+
+  // ── Start game ────────────────────────────────────────────────────────────
+  function startGame() {
+    document.getElementById('splash').style.display = 'none';
+    wonAlready  = false;
+    gameRunning = true;
+
+    buildButtons();
+    startTick();
+    teleportInt = setInterval(teleportAll, TELEPORT_EVERY);
+  }
+
+  // ── Win ───────────────────────────────────────────────────────────────────
+  function triggerWin() {
+    gameRunning = false;
+    clearInterval(teleportInt);
+    clearInterval(tickInt);
+    winOverlay.classList.add('show');
+    fetchFlag();
+  }
+
+  function fetchFlag() {
+    flagValue.textContent = 'connecting to server…';
+
+    fetch('https://whcsctf-api-bdu8.onrender.com/api/RedLightGreenLight')
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(data => {
+        flagValue.textContent = data.flag
+          ? data.flag
+          : '(unexpected response format)';
+      })
+      .catch(err => {
+        flagValue.textContent = 'server error: ' + err.message;
+      });
+  }
+
+  // ── Restart ───────────────────────────────────────────────────────────────
+  function restartGame() {
+    winOverlay.classList.remove('show');
+    gameRunning = false;
+    wonAlready  = false;
+
+    clearInterval(teleportInt);
+    clearInterval(tickInt);
+    activeTimers.forEach(t => { if (t !== null) clearTimeout(t); });
+
+    activeCount.textContent = '0';
+    progressBar.style.width = '0%';
+    arena.innerHTML = '';
+
+    startGame();
+  }
+</script>
+</body>
+</html>
