@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTFLab Mail – Phishing Detection Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --bg: #f6f8fc;
+      --border: #e2e8f0;
+      --text-primary: #202124;
+      --text-secondary: #5f6368;
+      --text-tertiary: #80868b;
+      --blue: #1a73e8;
+      --blue-light: #d3e3fd;
+      --blue-surface: #eaf1fb;
+      --green: #188038;
+      --green-light: #e6f4ea;
+      --red: #d93025;
+      --red-light: #fce8e6;
+      --yellow: #f9ab00;
+      --hover: #f1f3f4;
+      --selected: #c2e7ff;
+      --chip-bg: #e8eaed;
+      --sidebar-width: 256px;
+      --header-height: 64px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ─── HEADER ─── */
+    .gm-header {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      padding: 0 16px;
+      gap: 8px;
+      background: var(--bg);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .gm-header .menu-btn {
+      width: 40px; height: 40px;
+      border: none; background: none; cursor: pointer;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      transition: background 0.1s;
+      flex-shrink: 0;
+    }
+    .gm-header .menu-btn:hover { background: var(--hover); }
+    .logo-wrap {
+      display: flex; align-items: center; gap: 2px;
+      width: 196px; flex-shrink: 0; text-decoration: none;
+    }
+    .logo-svg { width: 40px; height: 40px; }
+    .logo-text {
+      font-size: 22px; color: var(--text-secondary);
+      font-weight: 400; letter-spacing: -0.5px;
+      margin-left: 4px;
+    }
+    .logo-text span { color: var(--text-primary); font-weight: 500; }
+    .search-bar {
+      flex: 1; max-width: 720px;
+      background: var(--blue-surface);
+      border-radius: 24px; height: 46px;
+      display: flex; align-items: center;
+      padding: 0 16px; gap: 12px;
+      transition: background 0.2s, box-shadow 0.2s;
+      cursor: text;
+    }
+    .search-bar:hover { background: #e2ecfa; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .search-bar .material-icons { color: var(--text-secondary); font-size: 20px; }
+    .search-bar input {
+      flex: 1; border: none; background: transparent;
+      font-size: 16px; font-family: inherit; color: var(--text-primary);
+      outline: none;
+    }
+    .search-bar input::placeholder { color: var(--text-secondary); }
+    .header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: none; cursor: pointer;
+      color: var(--text-secondary); position: relative;
+      transition: background 0.1s;
+    }
+    .icon-btn:hover { background: var(--hover); }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Progress Badge in Header */
+    .progress-badge {
+      background: var(--blue); color: #fff;
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .progress-badge .progress-bar-mini {
+      width: 60px; height: 6px; background: rgba(255,255,255,0.3);
+      border-radius: 3px; overflow: hidden;
+    }
+    .progress-bar-mini-fill {
+      height: 100%; background: #fff; border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* ─── MAIN LAYOUT ─── */
+    .gm-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ─── SIDEBAR ─── */
+    .gm-sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      overflow-y: auto;
+      padding: 8px 0;
+      background: var(--bg);
+    }
+    .gm-sidebar::-webkit-scrollbar { width: 4px; }
+    .gm-sidebar::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 2px; }
+
+    .compose-btn {
+      display: flex; align-items: center; gap: 12px;
+      margin: 8px 16px 8px 16px;
+      padding: 16px 24px;
+      background: #c2e7ff;
+      border-radius: 16px;
+      border: none; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      font-family: inherit;
+      color: var(--text-primary);
+      transition: background 0.15s, box-shadow 0.15s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .compose-btn:hover { background: #a8d7f7; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .compose-btn .material-icons { font-size: 20px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 4px 16px; height: 40px;
+      border-radius: 0 20px 20px 0;
+      margin-right: 16px;
+      cursor: pointer; font-size: 14px;
+      transition: background 0.1s;
+      color: var(--text-primary);
+    }
+    .nav-item:hover { background: var(--hover); }
+    .nav-item.active { background: var(--blue-light); font-weight: 600; }
+    .nav-item .material-icons { font-size: 20px; color: var(--text-secondary); }
+    .nav-item.active .material-icons { color: var(--text-primary); }
+    .nav-item .badge {
+      margin-left: auto; font-weight: 700; font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .sidebar-divider {
+      height: 1px; background: var(--border);
+      margin: 8px 16px;
+    }
+
+    .sidebar-label {
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      padding: 8px 16px 4px 16px; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── CONTENT AREA ─── */
+    .gm-content {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; background: var(--surface);
+      border-radius: 16px 0 0 0;
+      margin-top: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* ─── CHALLENGE BANNER ─── */
+    .challenge-banner {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d5bd1 100%);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 13px; flex-shrink: 0;
+    }
+    .challenge-banner .material-icons { font-size: 20px; }
+    .challenge-banner strong { font-weight: 600; }
+    .challenge-banner span { opacity: 0.9; }
+
+    /* ─── EMAIL LIST ─── */
+    #email-list-view { flex: 1; overflow-y: auto; }
+    #email-list-view::-webkit-scrollbar { width: 6px; }
+    #email-list-view::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 3px; }
+
+    .email-list-header {
+      display: flex; align-items: center; padding: 8px 16px;
+      border-bottom: 1px solid var(--border); gap: 16px;
+      flex-shrink: 0; min-height: 44px;
+    }
+    .email-list-header span { font-size: 13px; color: var(--text-secondary); }
+
+    .email-row {
+      display: flex; align-items: center;
+      padding: 0 16px; height: 54px;
+      border-bottom: 1px solid #f1f3f4;
+      cursor: pointer; gap: 8px;
+      position: relative;
+      transition: background 0.1s;
+      background: var(--surface);
+    }
+    .email-row:hover { background: #f1f3f4; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1; }
+    .email-row.unread { background: var(--surface); }
+    .email-row.read { background: #f6f8fc; }
+    .email-row.answered { background: #f0faf4; }
+    .email-row .check-area {
+      width: 24px; display: flex; justify-content: center;
+      color: var(--text-tertiary); flex-shrink: 0;
+    }
+    .email-row .star-icon {
+      color: var(--text-tertiary); font-size: 18px; flex-shrink: 0;
+      transition: color 0.1s;
+    }
+    .email-row:hover .star-icon { color: #f9ab00; }
+
+    .email-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500; color: #fff;
+      flex-shrink: 0; position: relative;
+    }
+    .email-avatar .answered-check {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--green); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; border: 1px solid var(--surface);
+    }
+
+    .email-meta {
+      flex: 1; display: flex; align-items: center;
+      gap: 4px; min-width: 0; overflow: hidden;
+    }
+    .email-from {
+      width: 180px; flex-shrink: 0;
+      font-size: 14px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .email-row.unread .email-from { font-weight: 600; }
+    .email-subject-preview {
+      flex: 1; font-size: 14px; color: var(--text-secondary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .email-subject-preview .subject {
+      color: var(--text-primary);
+    }
+    .email-row.unread .email-subject-preview .subject { font-weight: 600; }
+
+    .email-chip {
+      font-size: 11px; border-radius: 4px;
+      padding: 2px 6px; flex-shrink: 0;
+      background: var(--chip-bg); color: var(--text-secondary);
+    }
+    .email-chip.answered-chip {
+      background: var(--green-light); color: var(--green);
+      font-weight: 500;
+    }
+
+    .email-date {
+      font-size: 12px; color: var(--text-secondary);
+      flex-shrink: 0; white-space: nowrap; margin-left: 8px;
+    }
+    .email-row.unread .email-date { font-weight: 600; color: var(--text-primary); }
+
+    /* ─── EMAIL DETAIL ─── */
+    #email-detail-view {
+      display: none; flex: 1; overflow-y: auto;
+      flex-direction: column;
+    }
+    #email-detail-view.active { display: flex; }
+    #email-detail-view::-webkit-scrollbar { width: 6px; }
+    #email-detail-view::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 3px; }
+
+    .detail-toolbar {
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px 16px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .detail-toolbar .icon-btn { color: var(--text-secondary); }
+    .detail-toolbar .icon-btn:hover { background: var(--hover); }
+    .detail-toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+    .detail-subject {
+      padding: 20px 24px 8px;
+      font-size: 22px; font-weight: 400;
+      line-height: 1.4; flex-shrink: 0;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .detail-subject-text { flex: 1; }
+    .detail-subject .label-chip {
+      font-size: 12px; padding: 3px 8px; border-radius: 4px;
+      background: var(--chip-bg); color: var(--text-secondary);
+      font-weight: 500; white-space: nowrap; margin-top: 6px;
+    }
+
+    .email-thread {
+      padding: 0 24px 16px;
+      flex: 1;
+    }
+
+    .email-card {
+      border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; background: var(--surface);
+    }
+
+    .email-card-header {
+      display: flex; align-items: flex-start;
+      padding: 16px 20px; gap: 12px; cursor: pointer;
+    }
+    .sender-avatar-lg {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 500; color: #fff;
+      flex-shrink: 0;
+    }
+    .sender-info { flex: 1; min-width: 0; }
+    .sender-name {
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sender-email-small {
+      font-size: 12px; color: var(--text-secondary); font-weight: 400;
+    }
+    .sender-to { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .email-timestamp {
+      font-size: 12px; color: var(--text-secondary);
+      white-space: nowrap; flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .email-body-content {
+      padding: 0 20px 20px 72px;
+      font-size: 14px; line-height: 1.6;
+      color: var(--text-primary);
+    }
+    .email-body-content p { margin-bottom: 12px; }
+    .email-body-content hr { margin: 16px 0; border: none; border-top: 1px solid #e0e0e0; }
+    .email-btn {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff !important;
+      padding: 10px 28px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 4px 0;
+    }
+    .email-btn.danger { background: #d93025; }
+    .email-btn.warn { background: #f9ab00; }
+    .info-box {
+      background: #f8f9fa; border-radius: 8px;
+      padding: 14px 16px; margin: 16px 0;
+      border-left: 3px solid #dadce0;
+    }
+    .info-box.warn-box { border-left-color: var(--yellow); background: #fff8e1; }
+    .info-box table { border-collapse: collapse; width: 100%; }
+    .info-box td { padding: 3px 0; font-size: 13px; }
+    .info-box td:first-child { color: var(--text-secondary); width: 100px; }
+    .sig { color: var(--text-secondary); font-size: 13px; margin-top: 16px; }
+
+    /* ─── SMART REPLY BUBBLES ─── */
+    .smart-reply-section {
+      padding: 16px 20px 20px 72px;
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .smart-reply-label {
+      font-size: 12px; color: var(--text-secondary);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .smart-reply-label .material-icons { font-size: 16px; }
+    .smart-reply-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .reply-chip {
+      padding: 8px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-primary);
+      transition: all 0.15s;
+      font-weight: 400;
+    }
+    .reply-chip:hover {
+      background: var(--blue-surface);
+      border-color: var(--blue);
+      color: var(--blue);
+      box-shadow: 0 1px 3px rgba(26,115,232,0.2);
+    }
+    .reply-chip.selected {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      font-weight: 500;
+    }
+    .reply-chip.selected:hover { background: #1558b0; border-color: #1558b0; color: #fff; }
+
+    .already-answered-note {
+      font-size: 13px; color: var(--green); display: flex;
+      align-items: center; gap: 6px; font-weight: 500;
+    }
+
+    /* ─── RESULTS MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      width: 640px; max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s;
+    }
+    .modal-overlay.active .modal { transform: none; }
+    .modal-header {
+      padding: 28px 32px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .modal-score-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .modal-score-circle .score-num {
+      font-size: 28px; font-weight: 700; line-height: 1;
+    }
+    .modal-score-circle .score-denom {
+      font-size: 13px; opacity: 0.7;
+    }
+    .modal-title { font-size: 20px; font-weight: 500; }
+    .modal-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+    .modal-body { padding: 20px 32px 28px; }
+
+    .flag-box {
+      background: #0d0d0d; color: #00e676;
+      border-radius: 10px; padding: 16px 20px;
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-size: 18px; font-weight: 600;
+      letter-spacing: 1px; margin: 16px 0;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .flag-box .material-icons { font-size: 20px; }
+    .flag-box .flag-value { flex: 1; }
+    .copy-flag-btn {
+      background: none; border: 1px solid #00e676;
+      color: #00e676; border-radius: 6px;
+      padding: 4px 10px; cursor: pointer; font-size: 12px;
+      transition: background 0.1s;
+    }
+    .copy-flag-btn:hover { background: rgba(0,230,118,0.1); }
+
+    .results-list { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .result-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 13px; background: var(--hover);
+    }
+    .result-item.correct { background: var(--green-light); }
+    .result-item.incorrect { background: var(--red-light); }
+    .result-item .result-icon { font-size: 18px; flex-shrink: 0; }
+    .result-item.correct .result-icon { color: var(--green); }
+    .result-item.incorrect .result-icon { color: var(--red); }
+    .result-item .result-title { font-weight: 500; flex: 1; }
+    .result-item .result-explanation { color: var(--text-secondary); font-size: 12px; }
+    .result-meta { display: flex; flex-direction: column; flex: 1; }
+
+    .retry-btn {
+      margin-top: 20px; width: 100%;
+      padding: 12px; border-radius: 8px;
+      background: var(--blue); color: #fff;
+      border: none; cursor: pointer; font-size: 14px;
+      font-weight: 500; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .retry-btn:hover { background: #1558b0; }
+
+    .loading-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px; gap: 12px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── SCROLLBAR ─── */
+    .modal::-webkit-scrollbar { width: 6px; }
+    .modal::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── GMAIL HEADER ─── -->
+<header class="gm-header">
+  <button class="menu-btn" title="Menu">
+    <span class="material-icons">menu</span>
+  </button>
+  <a class="logo-wrap" href="#">
+    <svg class="logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="white"/>
+      <path d="M8 12h24l-12 10L8 12z" fill="#EA4335"/>
+      <path d="M8 12v16h5V18l-5-6z" fill="#C5221F"/>
+      <path d="M32 12v16h-5V18l5-6z" fill="#C5221F"/>
+      <path d="M8 28h5V18l7 5.5 7-5.5v10h5V12L20 22 8 12v16z" fill="#EA4335"/>
+      <path d="M13 18v10h14V18l-7 5.5L13 18z" fill="#FBBC05"/>
+    </svg>
+    <span class="logo-text">CTFLab <span>Mail</span></span>
+  </a>
+
+  <div class="search-bar" onclick="document.querySelector('.search-bar input').focus()">
+    <span class="material-icons">search</span>
+    <input type="text" placeholder="Search mail" readonly>
+    <span class="material-icons" style="margin-left:auto;font-size:18px;">tune</span>
+  </div>
+
+  <div class="header-actions">
+    <div class="progress-badge" id="progress-badge">
+      <span class="material-icons" style="font-size:16px;">security</span>
+      <span id="progress-text">0 / 10 reviewed</span>
+      <div class="progress-bar-mini">
+        <div class="progress-bar-mini-fill" id="header-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <button class="icon-btn" title="Help"><span class="material-icons">help_outline</span></button>
+    <button class="icon-btn" title="Settings"><span class="material-icons">settings</span></button>
+    <button class="icon-btn" title="Apps"><span class="material-icons">apps</span></button>
+    <div class="avatar">Y</div>
+  </div>
+</header>
+
+<!-- ─── MAIN ─── -->
+<div class="gm-main">
+
+  <!-- Sidebar -->
+  <nav class="gm-sidebar">
+    <button class="compose-btn">
+      <span class="material-icons">edit</span>
+      Compose
+    </button>
+
+    <div class="nav-item active">
+      <span class="material-icons">inbox</span>
+      Inbox
+      <span class="badge">10</span>
+    </div>
+    <div class="nav-item">
+      <span class="material-icons">star_border</span>
+      Starred
+    </div>
+    <div class="nav-item">
+      <span class="material-icons">access_time</span>
+      Snoozed
+    </div>
+    <div class="nav-item">
+      <span class="material-icons">send</span>
+      Sent
+    </div>
+    <div class="nav-item">
+      <span class="material-icons">drafts</span>
+      Drafts
+    </div>
+    <div class="nav-item">
+      <span class="material-icons">expand_more</span>
+      More
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">Labels</div>
+
+    <div class="nav-item">
+      <span class="material-icons" style="color:#1a73e8;font-size:14px;">circle</span>
+      Work
+    </div>
+    <div class="nav-item">
+      <span class="material-icons" style="color:#188038;font-size:14px;">circle</span>
+      Security
+    </div>
+    <div class="nav-item">
+      <span class="material-icons" style="color:#d93025;font-size:14px;">circle</span>
+      HR
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="gm-content">
+    <!-- Challenge Banner -->
+    <div class="challenge-banner">
+      <span class="material-icons">phishing</span>
+      <div>
+        <strong>Phishing Detection Challenge</strong>
+        <span> — Read each email carefully and choose the best response action. Some emails are legitimate, others are phishing attempts. Can you spot the difference?</span>
+      </div>
+    </div>
+
+    <!-- Email List View -->
+    <div id="email-list-view">
+      <div class="email-list-header">
+        <span class="material-icons" style="font-size:18px;color:var(--text-secondary);">inbox</span>
+        <span>Inbox</span>
+      </div>
+      <div id="email-rows-container"></div>
+    </div>
+
+    <!-- Email Detail View -->
+    <div id="email-detail-view">
+      <div class="detail-toolbar">
+        <button class="icon-btn" onclick="showEmailList()" title="Back to Inbox">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <div class="detail-toolbar-sep"></div>
+        <button class="icon-btn" title="Archive"><span class="material-icons">archive</span></button>
+        <button class="icon-btn" title="Report spam"><span class="material-icons">report_gmailerrorred</span></button>
+        <button class="icon-btn" title="Delete"><span class="material-icons">delete</span></button>
+        <div class="detail-toolbar-sep"></div>
+        <button class="icon-btn" title="Mark as unread"><span class="material-icons">mark_email_unread</span></button>
+        <button class="icon-btn" title="Snooze"><span class="material-icons">access_time</span></button>
+        <button class="icon-btn" title="More"><span class="material-icons">more_vert</span></button>
+        <div style="margin-left:auto;display:flex;gap:4px;">
+          <button class="icon-btn" title="Older" onclick="navigateEmail(-1)"><span class="material-icons">chevron_left</span></button>
+          <button class="icon-btn" title="Newer" onclick="navigateEmail(1)"><span class="material-icons">chevron_right</span></button>
+        </div>
+      </div>
+
+      <div class="detail-subject" id="detail-subject-line"></div>
+
+      <div class="email-thread" id="email-thread-container"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ─── RESULTS MODAL ─── -->
+<div class="modal-overlay" id="results-modal">
+  <div class="modal">
+    <div id="modal-content">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <span style="font-size:14px;color:var(--text-secondary);">Submitting your answers…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// CONFIGURATION – Change this to your server's URL
+const API_URL = 'http://localhost:3000';
+// ─────────────────────────────────────────────────────────
+
+const emails = [
+  {
+    id: 'email1',
+    from: 'CTFLab Security',
+    fromEmail: 'security@ctflab.io',
+    to: 'you@ctflab.io',
+    subject: 'Reset your CTFLab password',
+    preview: 'We received a request to reset the password for your CTFLab account. If you made this request…',
+    date: '9:14 AM',
+    fullDate: 'Mon, Apr 28, 2026, 9:14 AM',
+    avatarColor: '#1a73e8',
+    avatarLetter: 'C',
+    label: 'Security',
+    correctResponse: 'use_reset_link',
+    explanation: 'This is a legitimate security email. The sender domain matches <strong>ctflab.io</strong>, includes specific device details for transparency, and contains no urgency pressure. The correct action is to use the provided reset link.',
+    body: `
+      <p>Hi there,</p>
+      <p>We received a request to reset the password for your CTFLab account associated with <strong>you@ctflab.io</strong>. If you made this request, click the button below to reset your password.</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn">Reset Password</a>
+      </div>
+      <p>This link will expire in <strong>24 hours</strong>.</p>
+      <p>If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged and your account will not be affected.</p>
+      <div class="info-box">
+        <p style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">Security details for this request:</p>
+        <table>
+          <tr><td>IP Address</td><td>192.168.10.42</td></tr>
+          <tr><td>Browser</td><td>Chrome 124 on Windows 11</td></tr>
+          <tr><td>Location</td><td>New York, NY, USA</td></tr>
+          <tr><td>Time</td><td>Mon, Apr 28, 2026, 9:12 AM EST</td></tr>
+        </table>
+      </div>
+      <p class="sig">— The CTFLab Security Team<br>security@ctflab.io &nbsp;·&nbsp; ctflab.io/security</p>
+    `,
+    responses: [
+      { id: 'use_reset_link',    label: '🔑 Use the reset link' },
+      { id: 'login_directly_1',  label: '🖥️ Log in directly without clicking' },
+      { id: 'report_phish_1',    label: '🚨 Report as phishing' },
+      { id: 'forward_it_1',      label: '📩 Forward to IT to verify first' },
+    ]
+  },
+
+  {
+    id: 'email2',
+    from: 'IT Support',
+    fromEmail: 'it-support@ctflab.io',
+    to: 'you@ctflab.io',
+    subject: 'Action Required: MFA Enrollment by Friday',
+    preview: 'All CTFLab employees are required to enroll in Multi-Factor Authentication by this Friday, May 2nd…',
+    date: 'Apr 27',
+    fullDate: 'Sun, Apr 27, 2026, 2:31 PM',
+    avatarColor: '#137333',
+    avatarLetter: 'I',
+    label: 'IT',
+    correctResponse: 'complete_mfa',
+    explanation: 'This is a legitimate IT directive. The sender uses the official <strong>@ctflab.io</strong> domain, provides a specific deadline, links to an internal portal (<em>portal.ctflab.io</em>), and offers alternative contact methods — all hallmarks of authentic enterprise communication.',
+    body: `
+      <p>Hello,</p>
+      <p>As part of our ongoing security improvements, <strong>all CTFLab employees are required to enroll in Multi-Factor Authentication (MFA) by this Friday, May 2nd, 2026</strong>.</p>
+      <p>To complete your enrollment, please follow these steps:</p>
+      <ol style="padding-left:20px;margin:12px 0;line-height:2;">
+        <li>Visit the internal IT portal at <a href="#" onclick="return false;" style="color:var(--blue);">portal.ctflab.io/mfa</a></li>
+        <li>Sign in with your employee credentials</li>
+        <li>Follow the setup wizard to link your authenticator app</li>
+        <li>Save your backup codes in a secure location</li>
+      </ol>
+      <p>This is a <strong>mandatory security requirement</strong> for all staff. If you have already completed enrollment, no further action is needed.</p>
+      <p>If you encounter any issues or need assistance, please contact the IT Help Desk:</p>
+      <div class="info-box">
+        <table>
+          <tr><td>Phone</td><td>Ext. 4400 (internal)</td></tr>
+          <tr><td>Email</td><td>helpdesk@ctflab.io</td></tr>
+          <tr><td>Hours</td><td>Mon–Fri, 8 AM – 6 PM EST</td></tr>
+        </table>
+      </div>
+      <p class="sig">Thank you,<br>IT Support Team<br>CTFLab | it-support@ctflab.io</p>
+    `,
+    responses: [
+      { id: 'complete_mfa',     label: '📱 Complete MFA enrollment at the portal' },
+      { id: 'ignore_mfa',       label: '🙄 Ignore — MFA probably isn\'t mandatory' },
+      { id: 'report_phish_2',   label: '🚨 Report as phishing' },
+      { id: 'reply_mfa',        label: '📩 Reply asking if this email is real' },
+    ]
+  },
+
+  {
+    id: 'email3',
+    from: 'USPS Delivery Notification',
+    fromEmail: 'noreply@usps-track.net',
+    to: 'you@ctflab.io',
+    subject: 'Delivery Failed – Confirm Your Address Within 1 Hour',
+    preview: 'Your package could not be delivered. Confirm your shipping address within 1 hour to avoid return to sender…',
+    date: '11:03 AM',
+    fullDate: 'Mon, Apr 28, 2026, 11:03 AM',
+    avatarColor: '#4285f4',
+    avatarLetter: 'U',
+    label: 'Delivery',
+    correctResponse: 'report_phish_3',
+    explanation: 'This is a phishing email. Red flags: the sender domain is <strong>usps-track.net</strong> — not usps.com. There is no tracking number, no package description, artificial 1-hour urgency, and the "confirm address" link leads to the attacker\'s domain.',
+    body: `
+      <div style="background:#003087;padding:12px 20px;border-radius:4px 4px 0 0;margin:-1px -1px 0;">
+        <span style="color:#fff;font-size:18px;font-weight:700;">USPS</span>
+        <span style="color:#ccc;font-size:12px;margin-left:8px;">United States Postal Service</span>
+      </div>
+      <div style="background:#f5f5f5;padding:20px;border-radius:0 0 4px 4px;margin-bottom:16px;">
+        <p style="color:#d93025;font-weight:600;font-size:16px;">⚠️ Delivery Attempt Failed</p>
+        <p style="margin-top:8px;">We attempted to deliver your package today but were unable to complete the delivery due to an address discrepancy.</p>
+      </div>
+      <p><strong>To reschedule your delivery</strong>, please confirm your shipping address within <strong style="color:#d93025;">1 hour</strong> to avoid the package being returned to the sender.</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn danger">Confirm Your Address Now →</a>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13px;">Failure to confirm your information within the allotted time will result in your package being returned. Additional fees may apply for re-delivery.</p>
+      <p class="sig">USPS Customer Service<br>usps-track.net</p>
+    `,
+    responses: [
+      { id: 'click_confirm_3',  label: '📦 Click the link to confirm my address' },
+      { id: 'report_phish_3',   label: '🚨 Report as phishing — delete email' },
+      { id: 'call_usps_3',      label: '📞 Look up USPS\'s official number and call' },
+      { id: 'reply_address_3',  label: '📩 Reply with my address directly' },
+    ]
+  },
+
+  {
+    id: 'email4',
+    from: 'Sarah Chen',
+    fromEmail: 'sarah.chen@ctflab.io',
+    to: 'team@ctflab.io',
+    subject: '[Calendar Invite] Quarterly Security Review – Tomorrow 10:00 AM',
+    preview: 'You\'re invited to the Q2 Security Review. Tomorrow, Apr 29 · 10:00–11:00 AM · Conference Room B…',
+    date: '8:45 AM',
+    fullDate: 'Mon, Apr 28, 2026, 8:45 AM',
+    avatarColor: '#e37400',
+    avatarLetter: 'S',
+    label: 'Work',
+    correctResponse: 'accept_invite',
+    explanation: 'This is a legitimate internal calendar invite. It comes from a verified <strong>@ctflab.io</strong> address, includes specific room and virtual link details, a structured agenda, and no urgency or suspicious links.',
+    body: `
+      <p>Hi team,</p>
+      <p>You're invited to our <strong>Q2 Quarterly Security Review</strong> meeting. Please add this to your calendar.</p>
+      <div class="info-box">
+        <table>
+          <tr><td>📅 Date</td><td>Tuesday, April 29, 2026</td></tr>
+          <tr><td>⏰ Time</td><td>10:00 AM – 11:00 AM EST</td></tr>
+          <tr><td>📍 Location</td><td>Conference Room B / Virtual</td></tr>
+          <tr><td>🔗 Virtual</td><td><a href="#" onclick="return false;" style="color:var(--blue);">meet.ctflab.io/qsr-q2-2026</a></td></tr>
+          <tr><td>🆔 Meeting ID</td><td>847-291-066</td></tr>
+        </table>
+      </div>
+      <p><strong>Agenda:</strong></p>
+      <ol style="padding-left:20px;margin:8px 0;line-height:2;font-size:14px;">
+        <li>Q1 incident summary & lessons learned</li>
+        <li>Current threat landscape update</li>
+        <li>Policy review — remote access guidelines</li>
+        <li>Q2 security goals & OKRs</li>
+      </ol>
+      <p>Please come prepared with your team's Q1 security metrics. Let me know if you have any scheduling conflicts by end of day today.</p>
+      <p class="sig">Sarah Chen<br>Head of Security Operations · CTFLab<br>📞 Ext. 5502 &nbsp;·&nbsp; sarah.chen@ctflab.io</p>
+    `,
+    responses: [
+      { id: 'accept_invite',    label: '✅ Accept the calendar invite' },
+      { id: 'report_susp_4',    label: '🚨 Report as suspicious activity' },
+      { id: 'verify_it_4',      label: '🔍 Ask IT to verify the sender first' },
+      { id: 'decline_4',        label: '❌ Decline and ignore the email' },
+    ]
+  },
+
+  {
+    id: 'email5',
+    from: 'CTFLab Security Alert',
+    fromEmail: 'security@ctfl4b-alert.com',
+    to: 'you@ctflab.io',
+    subject: '⚠️ Your Account Has Been Locked – Immediate Action Required',
+    preview: 'We have detected suspicious activity on your CTFLab account. Verify your identity within 30 minutes…',
+    date: '10:22 AM',
+    fullDate: 'Mon, Apr 28, 2026, 10:22 AM',
+    avatarColor: '#c5221f',
+    avatarLetter: 'C',
+    label: 'Security',
+    correctResponse: 'report_phish_5',
+    explanation: 'This is a phishing email. The sender domain is <strong>ctfl4b-alert.com</strong> — note the "4" instead of "a" in "ctflab" (typosquatting). The extreme urgency ("30 minutes or permanent lock") and fear-based language are classic phishing tactics.',
+    body: `
+      <div style="background:#d93025;padding:14px 20px;border-radius:6px;color:#fff;margin-bottom:20px;text-align:center;">
+        <p style="font-size:18px;font-weight:700;">⚠️ SECURITY ALERT</p>
+        <p style="font-size:13px;margin-top:4px;opacity:0.9;">Immediate action required on your account</p>
+      </div>
+      <p>We have detected <strong>suspicious login activity</strong> on your CTFLab account. To protect your data, your account access has been <strong>temporarily suspended</strong>.</p>
+      <p style="margin-top:12px;">You must verify your identity within the next <strong style="color:#d93025;">30 minutes</strong> or your account will be <strong style="color:#d93025;">permanently locked and all data deleted</strong>.</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn danger">VERIFY MY IDENTITY NOW →</a>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13px;">This link expires in 30 minutes. Do not share this link with anyone.</p>
+      <p class="sig">CTFLab Security Team<br>security@ctfl4b-alert.com</p>
+    `,
+    responses: [
+      { id: 'click_verify_5',   label: '🔒 Click to verify identity immediately' },
+      { id: 'report_phish_5',   label: '🚨 Report as phishing — do not click' },
+      { id: 'call_support_5',   label: '📞 Call official CTFLab support to verify' },
+      { id: 'check_account_5',  label: '🖥️ Check account by navigating manually' },
+    ]
+  },
+
+  {
+    id: 'email6',
+    from: 'Human Resources',
+    fromEmail: 'hr@ctflab.io',
+    to: 'all@ctflab.io',
+    subject: 'Updated Remote Work Policy – Effective May 15th',
+    preview: 'Please be advised that our Remote Work Policy has been updated effective May 15, 2026. Key changes include…',
+    date: 'Apr 25',
+    fullDate: 'Fri, Apr 25, 2026, 3:15 PM',
+    avatarColor: '#7627bb',
+    avatarLetter: 'H',
+    label: 'HR',
+    correctResponse: 'review_policy',
+    explanation: 'This is a legitimate HR communication. It comes from <strong>hr@ctflab.io</strong>, is addressed to all staff, uses passive language ("no immediate action required"), provides a reasonable future deadline, and refers to the official HR portal.',
+    body: `
+      <p>Dear CTFLab Team,</p>
+      <p>Please be advised that our <strong>Remote Work Policy</strong> has been updated, effective <strong>May 15, 2026</strong>. This revision reflects our evolving hybrid work model and updated security requirements.</p>
+      <p><strong>Summary of key changes:</strong></p>
+      <ul style="padding-left:20px;margin:12px 0;line-height:2;font-size:14px;">
+        <li>Hybrid schedule: minimum 2 days in-office per week (team leads: 3 days)</li>
+        <li>Updated home office equipment reimbursement — up to $600/year</li>
+        <li>New security requirements for remote access (VPN mandatory)</li>
+        <li>Flexible start times: core hours 10 AM – 3 PM EST</li>
+      </ul>
+      <p>The <strong>full policy document is attached</strong> to this email. Please review it at your convenience and acknowledge receipt by signing into the HR portal.</p>
+      <div class="info-box">
+        <p style="font-size:13px;"><strong>No immediate action is required.</strong> Acknowledgment deadline: May 10, 2026</p>
+        <p style="font-size:13px;margin-top:6px;">HR Portal: <a href="#" onclick="return false;" style="color:var(--blue);">hr.ctflab.io</a></p>
+      </div>
+      <p>Questions? Contact your manager or reach out to the HR team directly at hr@ctflab.io.</p>
+      <p class="sig">Best regards,<br>Jessica Morgan<br>Director of Human Resources · CTFLab<br>hr@ctflab.io | Ext. 3310</p>
+    `,
+    responses: [
+      { id: 'review_policy',    label: '📄 Review the attached policy document' },
+      { id: 'report_phish_6',   label: '🚨 Report as phishing' },
+      { id: 'delete_6',         label: '🗑️ Delete without opening the attachment' },
+      { id: 'forward_it_6',     label: '🔍 Forward to IT security for scanning' },
+    ]
+  },
+
+  {
+    id: 'email7',
+    from: 'BillingDept',
+    fromEmail: 'billing@invoiceservices-llc.net',
+    to: 'you@ctflab.io',
+    subject: 'Invoice #88321 – Payment OVERDUE – Immediate Action Required',
+    preview: 'Invoice #88321 is past due. Immediate payment required to avoid service interruption. Amount due: $2,847.00…',
+    date: '7:58 AM',
+    fullDate: 'Mon, Apr 28, 2026, 7:58 AM',
+    avatarColor: '#5f6368',
+    avatarLetter: 'B',
+    label: 'Finance',
+    correctResponse: 'report_phish_7',
+    explanation: 'This is a phishing email. Red flags: unknown vendor domain <strong>invoiceservices-llc.net</strong>, no prior relationship, vague invoice with no line items, excessive urgency ("OVERDUE"), and a suspicious download link. Legitimate invoices arrive from known vendors via established processes.',
+    body: `
+      <div style="border:2px solid #d93025;border-radius:6px;padding:14px 18px;margin-bottom:20px;background:#fce8e6;">
+        <p style="color:#d93025;font-weight:700;font-size:15px;">⚠️ PAST DUE NOTICE</p>
+        <p style="color:#d93025;font-size:13px;margin-top:4px;">Your account is overdue. Immediate payment required.</p>
+      </div>
+      <p>Dear Customer,</p>
+      <p>This is a notice that <strong>Invoice #88321</strong> is now past due. Immediate payment is required to avoid service interruption, late fees, and potential account suspension.</p>
+      <div class="info-box" style="border-left-color:#d93025;">
+        <table>
+          <tr><td>Invoice #</td><td><strong>88321</strong></td></tr>
+          <tr><td>Amount Due</td><td><strong style="color:#d93025;">$2,847.00</strong></td></tr>
+          <tr><td>Original Due</td><td>April 15, 2026</td></tr>
+          <tr><td>Status</td><td><strong style="color:#d93025;">OVERDUE</strong></td></tr>
+        </table>
+      </div>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn danger">Download Invoice &amp; Pay Now →</a>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13px;">Please process payment immediately to maintain your services. Additional late fees will apply after April 30, 2026.</p>
+      <p class="sig">Regards,<br>Billing Department<br>InvoiceServices LLC<br>billing@invoiceservices-llc.net</p>
+    `,
+    responses: [
+      { id: 'download_pay_7',   label: '💳 Download the invoice and pay' },
+      { id: 'report_phish_7',   label: '🚨 Report as phishing — delete email' },
+      { id: 'forward_finance_7',label: '📤 Forward to the finance department' },
+      { id: 'reply_details_7',  label: '📩 Reply asking for more invoice details' },
+    ]
+  },
+
+  {
+    id: 'email8',
+    from: 'CTFLab Account Security',
+    fromEmail: 'alerts@ctflab-security.io',
+    to: 'you@ctflab.io',
+    subject: 'New sign-in to your account from an unrecognized device',
+    preview: 'We noticed a new sign-in from Chrome on Windows 11 in Newark, NJ at 6:31 AM. If this was you, no action required…',
+    date: '6:34 AM',
+    fullDate: 'Mon, Apr 28, 2026, 6:34 AM',
+    avatarColor: '#1a73e8',
+    avatarLetter: 'C',
+    label: 'Security',
+    correctResponse: 'report_phish_8',
+    explanation: 'This is a phishing email — look closely at the sender domain: <strong>ctflab-security.io</strong> is NOT the same as ctflab.io. This is a lookalike domain. Legitimate CTFLab security alerts always come from @ctflab.io. The "secure my account" link leads to the attacker\'s domain.',
+    body: `
+      <p>Hi,</p>
+      <p>We noticed a new sign-in to your <strong>CTFLab account</strong>. Here are the details:</p>
+      <div class="info-box">
+        <table>
+          <tr><td>Device</td><td>Chrome 124 on Windows 11</td></tr>
+          <tr><td>Location</td><td>Newark, NJ, USA</td></tr>
+          <tr><td>IP Address</td><td>73.241.19.88</td></tr>
+          <tr><td>Time</td><td>Mon, Apr 28, 2026 at 6:31 AM EST</td></tr>
+        </table>
+      </div>
+      <p><strong>If this was you</strong>, no action is required. You can safely ignore this email.</p>
+      <p style="margin-top:12px;"><strong>If you don't recognize this activity</strong>, your account may be compromised. Click below to immediately secure your account:</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn">This wasn't me – Secure My Account →</a>
+      </div>
+      <p class="sig">CTFLab Account Security Team<br>alerts@ctflab-security.io</p>
+    `,
+    responses: [
+      { id: 'ignore_login_8',   label: '👍 This was me — no action needed' },
+      { id: 'report_phish_8',   label: '🚨 Report as phishing — wrong sender domain' },
+      { id: 'click_secure_8',   label: '🔒 Click to secure the account immediately' },
+      { id: 'ignore_legit_8',   label: '🤔 Looks legitimate — ignore for now' },
+    ]
+  },
+
+  {
+    id: 'email9',
+    from: 'Docs Sharing Service',
+    fromEmail: 'no-reply@docs-share.net',
+    to: 'you@ctflab.io',
+    subject: 'Someone shared a document with you',
+    preview: 'A document has been shared with you. Click here to view. You have Editor access. Link expires in 48 hours…',
+    date: '2:17 PM',
+    fullDate: 'Mon, Apr 28, 2026, 2:17 PM',
+    avatarColor: '#0097a7',
+    avatarLetter: 'D',
+    label: 'Documents',
+    correctResponse: 'report_phish_9',
+    explanation: 'This is a phishing email. There is no named sender, no document title, no context for why it was shared, and the link goes to a suspicious domain <strong>docs-share.net</strong>. Legitimate document-sharing notifications (Google Drive, SharePoint, etc.) always identify the sender and document name.',
+    body: `
+      <div style="text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:20px;">
+        <span class="material-icons" style="font-size:48px;color:#1a73e8;">description</span>
+        <p style="font-size:18px;font-weight:500;margin-top:12px;">A document has been shared with you</p>
+      </div>
+      <p>Someone has shared a document with you and granted you <strong>Editor access</strong>.</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn">Click here to view the document →</a>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13px;">This link will expire in <strong>48 hours</strong>. You will need to sign in to view this document.</p>
+      <p class="sig">— Docs Sharing Service<br>no-reply@docs-share.net</p>
+    `,
+    responses: [
+      { id: 'click_doc_9',      label: '📄 Click the link to view the document' },
+      { id: 'report_phish_9',   label: '🚨 Report as phishing — delete email' },
+      { id: 'ask_sender_9',     label: '💬 Reply to ask who shared it' },
+      { id: 'scan_link_9',      label: '🔍 Ask IT to scan the link first' },
+    ]
+  },
+
+  {
+    id: 'email10',
+    from: 'Account Management Team',
+    fromEmail: 'account-team@ctflab-verify.com',
+    to: 'you@ctflab.io',
+    subject: '🚨 FINAL NOTICE: Your Account Will Be Closed in 30 Minutes',
+    preview: 'This is your last warning. Your CTFLab account is scheduled for permanent deletion unless you verify…',
+    date: '12:00 PM',
+    fullDate: 'Mon, Apr 28, 2026, 12:00 PM',
+    avatarColor: '#d93025',
+    avatarLetter: 'A',
+    label: 'Urgent',
+    correctResponse: 'report_phish_10',
+    explanation: 'This is a phishing email — every element is a red flag. The domain <strong>ctflab-verify.com</strong> is not ctflab.io. "FINAL NOTICE," "30 MINUTES," "permanent deletion," all-caps text, and extreme urgency with no context are the hallmarks of a fear-based phishing attack.',
+    body: `
+      <div style="background:#7f0000;padding:16px 20px;border-radius:6px;color:#fff;margin-bottom:20px;text-align:center;animation: pulse 1s infinite;">
+        <p style="font-size:20px;font-weight:700;">🚨 FINAL NOTICE</p>
+        <p style="font-size:13px;margin-top:4px;opacity:0.9;">URGENT – IMMEDIATE ACTION REQUIRED</p>
+      </div>
+      <p><strong>This is your last and final warning.</strong></p>
+      <p style="margin-top:8px;">We have attempted to contact you <strong>multiple times</strong> regarding unauthorized activity detected on your account. You have repeatedly failed to respond.</p>
+      <p style="margin-top:12px;color:#d93025;font-weight:700;font-size:15px;">⚠️ Your CTFLab account is scheduled for PERMANENT DELETION in 30 MINUTES.</p>
+      <p style="margin-top:12px;">All associated data, files, and records will be <strong>permanently and irreversibly deleted</strong> unless you verify your account information IMMEDIATELY.</p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="#" onclick="return false;" class="email-btn danger" style="font-size:16px;padding:14px 40px;">⚡ VERIFY NOW BEFORE IT'S TOO LATE</a>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13px;text-align:center;"><em>Do NOT ignore this email. This is your only remaining opportunity.</em></p>
+      <p class="sig">Account Management Team<br>CTFLab Support<br>account-team@ctflab-verify.com</p>
+    `,
+    responses: [
+      { id: 'verify_now_10',    label: '⚡ Verify account immediately!' },
+      { id: 'report_phish_10',  label: '🚨 Report as phishing — delete email' },
+      { id: 'contact_support_10',label: '📞 Contact official CTFLab support to check' },
+      { id: 'forward_sec_10',   label: '📤 Forward to the security team' },
+    ]
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────
+let answers = {};
+let currentEmailId = null;
+
+// ─── RENDER EMAIL LIST ────────────────────────────────────
+function renderEmailList() {
+  const container = document.getElementById('email-rows-container');
+  container.innerHTML = '';
+  emails.forEach(email => {
+    const isAnswered = !!answers[email.id];
+    const row = document.createElement('div');
+    row.className = `email-row ${isAnswered ? 'answered read' : 'unread'}`;
+    row.dataset.emailId = email.id;
+    row.onclick = () => openEmail(email.id);
+    row.innerHTML = `
+      <div class="check-area">
+        <span class="material-icons" style="font-size:16px;">${isAnswered ? 'check_circle' : 'radio_button_unchecked'}</span>
+      </div>
+      <span class="material-icons star-icon">star_border</span>
+      <div class="email-avatar" style="background:${email.avatarColor}">
+        ${email.avatarLetter}
+        ${isAnswered ? '<div class="answered-check"><span class="material-icons" style="font-size:10px;">check</span></div>' : ''}
+      </div>
+      <div class="email-meta">
+        <div class="email-from">${email.from}</div>
+        <div class="email-subject-preview">
+          <span class="subject">${email.subject}</span>
+          <span style="color:var(--text-tertiary)"> – </span>${email.preview}
+        </div>
+      </div>
+      ${isAnswered ? '<span class="email-chip answered-chip">Reviewed</span>' : ''}
+      <div class="email-date">${email.date}</div>
+    `;
+    container.appendChild(row);
+  });
+  updateProgress();
+}
+
+// ─── OPEN EMAIL ───────────────────────────────────────────
+function openEmail(emailId) {
+  const email = emails.find(e => e.id === emailId);
+  if (!email) return;
+  currentEmailId = emailId;
+
+  document.getElementById('email-list-view').style.display = 'none';
+  const detailView = document.getElementById('email-detail-view');
+  detailView.classList.add('active');
+  detailView.scrollTop = 0;
+
+  // Subject line
+  document.getElementById('detail-subject-line').innerHTML = `
+    <div class="detail-subject-text">${email.subject}</div>
+    <div class="label-chip">${email.label}</div>
+  `;
+
+  // Thread
+  const isAnswered = !!answers[email.id];
+  const selectedResponseId = answers[email.id];
+
+  const responsesHTML = isAnswered
+    ? `<div class="already-answered-note"><span class="material-icons" style="font-size:18px;color:var(--green);">check_circle</span> Response recorded. Return to inbox to review other emails.</div>`
+    : `
+      <div class="smart-reply-section">
+        <div class="smart-reply-label">
+          <span class="material-icons">auto_awesome</span>
+          Choose the best action to take:
+        </div>
+        <div class="smart-reply-chips">
+          ${email.responses.map(r => `
+            <button class="reply-chip ${selectedResponseId === r.id ? 'selected' : ''}"
+              onclick="selectResponse('${email.id}', '${r.id}', this)">
+              ${r.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+  document.getElementById('email-thread-container').innerHTML = `
+    <div class="email-card">
+      <div class="email-card-header">
+        <div class="sender-avatar-lg" style="background:${email.avatarColor}">${email.avatarLetter}</div>
+        <div class="sender-info">
+          <div class="sender-name">
+            ${email.from}
+            <span class="sender-email-small">&lt;${email.fromEmail}&gt;</span>
+          </div>
+          <div class="sender-to">to ${email.to} &nbsp;<span class="material-icons" style="font-size:14px;vertical-align:middle;">expand_more</span></div>
+        </div>
+        <div class="email-timestamp">
+          ${email.fullDate}
+          <button class="icon-btn"><span class="material-icons" style="font-size:18px;">star_border</span></button>
+          <button class="icon-btn"><span class="material-icons" style="font-size:18px;">reply</span></button>
+          <button class="icon-btn"><span class="material-icons" style="font-size:18px;">more_vert</span></button>
+        </div>
+      </div>
+      <div class="email-body-content">${email.body}</div>
+      ${isAnswered
+        ? `<div style="padding:16px 20px 20px 72px;border-top:1px solid var(--border);background:#fafafa;">
+             <div class="already-answered-note">
+               <span class="material-icons" style="font-size:18px;">check_circle</span>
+               Response recorded — you chose: <strong style="margin-left:4px;">${email.responses.find(r=>r.id===selectedResponseId)?.label || ''}</strong>
+             </div>
+           </div>`
+        : `<div class="smart-reply-section">
+             <div class="smart-reply-label">
+               <span class="material-icons">auto_awesome</span>
+               Choose the best action to take:
+             </div>
+             <div class="smart-reply-chips">
+               ${email.responses.map(r => `
+                 <button class="reply-chip"
+                   onclick="selectResponse('${email.id}', '${r.id}', this)">
+                   ${r.label}
+                 </button>
+               `).join('')}
+             </div>
+           </div>`
+      }
+    </div>
+  `;
+}
+
+// ─── SELECT RESPONSE ──────────────────────────────────────
+function selectResponse(emailId, responseId, btn) {
+  if (answers[emailId]) return; // Already answered
+
+  // Highlight selected chip
+  const chips = btn.closest('.smart-reply-chips').querySelectorAll('.reply-chip');
+  chips.forEach(c => c.classList.remove('selected'));
+  btn.classList.add('selected');
+  btn.disabled = true;
+
+  answers[emailId] = responseId;
+  updateProgress();
+
+  // Brief delay then return to inbox (or check completion)
+  setTimeout(() => {
+    const answered = Object.keys(answers).length;
+    if (answered >= 10) {
+      showEmailList();
+      setTimeout(() => submitAnswers(), 400);
+    } else {
+      showEmailList();
+    }
+  }, 700);
+}
+
+// ─── SHOW EMAIL LIST ──────────────────────────────────────
+function showEmailList() {
+  document.getElementById('email-list-view').style.display = 'block';
+  document.getElementById('email-detail-view').classList.remove('active');
+  currentEmailId = null;
+  renderEmailList();
+}
+
+// ─── NAVIGATE EMAIL ───────────────────────────────────────
+function navigateEmail(direction) {
+  const idx = emails.findIndex(e => e.id === currentEmailId);
+  const next = emails[idx + direction];
+  if (next) openEmail(next.id);
+}
+
+// ─── UPDATE PROGRESS ─────────────────────────────────────
+function updateProgress() {
+  const count = Object.keys(answers).length;
+  document.getElementById('progress-text').textContent = `${count} / 10 reviewed`;
+  document.getElementById('header-progress-fill').style.width = `${(count / 10) * 100}%`;
+}
+
+// ─── SUBMIT ANSWERS ───────────────────────────────────────
+async function submitAnswers() {
+  const modal = document.getElementById('results-modal');
+  modal.classList.add('active');
+  document.getElementById('modal-content').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span style="font-size:14px;color:var(--text-secondary);">Submitting your answers to the server…</span>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(`${API_URL}/api/phishing`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers })
+    });
+
+    if (!response.ok) throw new Error('Server error: ' + response.status);
+    const data = await response.json();
+    showResults(data);
+  } catch (err) {
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-header">
+        <div class="modal-score-circle" style="background:#fce8e6;">
+          <span class="material-icons" style="font-size:40px;color:#d93025;">error</span>
+        </div>
+        <div>
+          <div class="modal-title">Connection Error</div>
+          <div class="modal-subtitle">${err.message}</div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--text-secondary);">Make sure the CTFLab server is running at <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">${API_URL}</code> and try again.</p>
+        <button class="retry-btn" onclick="retrySubmit()">Try Again</button>
+      </div>
+    `;
+  }
+}
+
+function retrySubmit() {
+  submitAnswers();
+}
+
+// ─── SHOW RESULTS ─────────────────────────────────────────
+function showResults(data) {
+  const { score, total, results, flag, success, message } = data;
+  const pct = Math.round((score / total) * 100);
+
+  const circleColor = success ? 'var(--green)' : score >= 6 ? 'var(--yellow)' : '#d93025';
+  const circleBg = success ? 'var(--green-light)' : score >= 6 ? '#fff8e1' : 'var(--red-light)';
+  const titleText = success ? '🎉 Challenge Complete!' : score >= 6 ? '📚 Almost There!' : '🔁 Keep Practicing!';
+
+  const flagHTML = flag ? `
+    <div style="margin-top:12px;">
+      <p style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">🏁 Your Flag:</p>
+      <div class="flag-box">
+        <span class="material-icons">flag</span>
+        <span class="flag-value" id="flag-text">${flag}</span>
+        <button class="copy-flag-btn" onclick="copyFlag('${flag}')">Copy</button>
+      </div>
+    </div>
+  ` : `
+    <div style="margin-top:12px;background:#fff8e1;border-radius:8px;padding:12px 16px;font-size:13px;color:#e37400;">
+      ⚠️ ${message || `You need at least 8/10 correct to earn the flag. Review the emails below and try again!`}
+    </div>
+  `;
+
+  const resultsItemsHTML = emails.map(email => {
+    const correct = results ? results[email.id] : false;
+    const userAnswer = answers[email.id];
+    const userLabel = email.responses.find(r => r.id === userAnswer)?.label || '—';
+    return `
+      <div class="result-item ${correct ? 'correct' : 'incorrect'}">
+        <span class="material-icons result-icon">${correct ? 'check_circle' : 'cancel'}</span>
+        <div class="result-meta">
+          <div class="result-title">${email.subject}</div>
+          <div class="result-explanation">
+            Your action: <em>${userLabel}</em>
+          </div>
+          <div class="result-explanation" style="margin-top:3px;">${email.explanation}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-score-circle" style="background:${circleBg};color:${circleColor};">
+        <span class="score-num" style="color:${circleColor};">${score}</span>
+        <span class="score-denom" style="color:${circleColor};">/ ${total}</span>
+      </div>
+      <div>
+        <div class="modal-title">${titleText}</div>
+        <div class="modal-subtitle">You correctly identified ${score} out of ${total} emails (${pct}%)</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      ${flagHTML}
+      <p style="font-size:13px;font-weight:600;margin:20px 0 8px;">Email-by-Email Results:</p>
+      <div class="results-list">${resultsItemsHTML}</div>
+      ${!success ? `<button class="retry-btn" onclick="retryChallenge()">
+        <span class="material-icons" style="vertical-align:middle;margin-right:6px;font-size:18px;">refresh</span>
+        Try Again
+      </button>` : ''}
+    </div>
+  `;
+}
+
+function copyFlag(flag) {
+  navigator.clipboard.writeText(flag).then(() => {
+    const btn = document.querySelector('.copy-flag-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); }
+  });
+}
+
+function retryChallenge() {
+  answers = {};
+  document.getElementById('results-modal').classList.remove('active');
+  renderEmailList();
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+renderEmailList();
+</script>
+</body>
+</html>
