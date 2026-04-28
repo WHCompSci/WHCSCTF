@@ -55,13 +55,12 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
 
   /* ── CARD ── */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;aspect-ratio:2/1;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s,opacity .15s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;aspect-ratio:2/1;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s,background .2s;box-shadow:var(--sh-sm);user-select:none;position:relative;overflow:hidden}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong);transition:background .2s}
   .card:hover{border-color:var(--border-strong);box-shadow:var(--sh-md);transform:translateY(-1px)}
   .card.solved{background:var(--solved);border-color:var(--solved-b)}
   .card.solved::before{background:var(--accent-d)}
   .card.solved:hover{border-color:var(--accent-d)}
-  .card.tag-hidden{opacity:.25;pointer-events:none}
   .card-name{font-size:.825rem;font-weight:500;color:var(--text);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card.solved .card-name{color:var(--solved-t)}
   .card-pts{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text-3)}
@@ -341,7 +340,7 @@ function applyFilter() {
       const cardTags = JSON.parse(card.dataset.tags);
       const matches  = activeTags.size === 0 ||
                        [...activeTags].every(t => cardTags.includes(t));
-      card.classList.toggle('tag-hidden', !matches);
+      card.style.display = matches ? '' : 'none';
       if (matches) { sectionHasVisible = true; anyVisible = true; }
     });
     sec.classList.toggle('hidden', !sectionHasVisible);
