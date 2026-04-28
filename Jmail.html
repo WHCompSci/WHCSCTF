@@ -694,7 +694,7 @@
 <script>
 // ─────────────────────────────────────────────────────────
 // CONFIGURATION – Change this to your server's URL
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://whcsctf-api-bdu8.onrender.com/api/phishing';
 // ─────────────────────────────────────────────────────────
 
 const emails = [
@@ -1265,30 +1265,13 @@ function updateProgress() {
 }
 
 // ─── SUBMIT ANSWERS ───────────────────────────────────────
-async function submitAnswers(answers) {
+async function submitAnswers() {
   const modal = document.getElementById('results-modal');
-  const content = document.getElementById('modal-content');
-
-  // Guard: missing DOM
-  if (!modal || !content) {
-    console.error('Modal elements not found in DOM');
-    return;
-  }
-
-  // Guard: missing data
-  if (!answers || typeof answers !== 'object') {
-    console.error('Invalid or missing answers payload:', answers);
-    return;
-  }
-
   modal.classList.add('active');
-
-  content.innerHTML = `
+  document.getElementById('modal-content').innerHTML = `
     <div class="loading-state">
       <div class="spinner"></div>
-      <span style="font-size:14px;color:var(--text-secondary);">
-        Submitting your answers to the server…
-      </span>
+      <span style="font-size:14px;color:var(--text-secondary);">Submitting your answers to the server…</span>
     </div>
   `;
 
@@ -1299,55 +1282,23 @@ async function submitAnswers(answers) {
       body: JSON.stringify({ answers })
     });
 
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error('Server error: ' + response.status);
     const data = await response.json();
-
-    if (typeof showResults === 'function') {
-      showResults(data);
-    } else {
-      console.warn('showResults() is not defined. Raw response:', data);
-
-      content.innerHTML = `
-        <div class="modal-header">
-          <div class="modal-title">Results received</div>
-        </div>
-        <div class="modal-body">
-          <pre style="font-size:12px;white-space:pre-wrap;">${JSON.stringify(data, null, 2)}</pre>
-        </div>
-      `;
-    }
-
+    showResults(data);
   } catch (err) {
-    console.error('Submit failed:', err);
-
-    content.innerHTML = `
+    document.getElementById('modal-content').innerHTML = `
       <div class="modal-header">
         <div class="modal-score-circle" style="background:#fce8e6;">
-          <span class="material-icons" style="font-size:40px;color:#d93025;">
-            error
-          </span>
+          <span class="material-icons" style="font-size:40px;color:#d93025;">error</span>
         </div>
         <div>
           <div class="modal-title">Connection Error</div>
           <div class="modal-subtitle">${err.message}</div>
         </div>
       </div>
-
       <div class="modal-body">
-        <p style="font-size:14px;color:var(--text-secondary);">
-          Make sure the server is running at
-          <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">
-            ${API_URL}
-          </code>
-          and try again.
-        </p>
-
-        <button class="retry-btn" onclick="submitAnswers(${JSON.stringify(answers).replace(/"/g, '&quot;')})">
-          Try Again
-        </button>
+        <p style="font-size:14px;color:var(--text-secondary);">Make sure the CTFLab server is running at <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">${API_URL}</code> and try again.</p>
+        <button class="retry-btn" onclick="retrySubmit()">Try Again</button>
       </div>
     `;
   }
