@@ -1265,13 +1265,30 @@ function updateProgress() {
 }
 
 // ─── SUBMIT ANSWERS ───────────────────────────────────────
-async function submitAnswers() {
+async function submitAnswers(answers) {
   const modal = document.getElementById('results-modal');
+  const content = document.getElementById('modal-content');
+
+  // Guard: missing DOM
+  if (!modal || !content) {
+    console.error('Modal elements not found in DOM');
+    return;
+  }
+
+  // Guard: missing data
+  if (!answers || typeof answers !== 'object') {
+    console.error('Invalid or missing answers payload:', answers);
+    return;
+  }
+
   modal.classList.add('active');
-  document.getElementById('modal-content').innerHTML = `
+
+  content.innerHTML = `
     <div class="loading-state">
       <div class="spinner"></div>
-      <span style="font-size:14px;color:var(--text-secondary);">Submitting your answers to the server…</span>
+      <span style="font-size:14px;color:var(--text-secondary);">
+        Submitting your answers to the server…
+      </span>
     </div>
   `;
 
@@ -1282,23 +1299,55 @@ async function submitAnswers() {
       body: JSON.stringify({ answers })
     });
 
-    if (!response.ok) throw new Error('Server error: ' + response.status);
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
     const data = await response.json();
-    showResults(data);
+
+    if (typeof showResults === 'function') {
+      showResults(data);
+    } else {
+      console.warn('showResults() is not defined. Raw response:', data);
+
+      content.innerHTML = `
+        <div class="modal-header">
+          <div class="modal-title">Results received</div>
+        </div>
+        <div class="modal-body">
+          <pre style="font-size:12px;white-space:pre-wrap;">${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+    }
+
   } catch (err) {
-    document.getElementById('modal-content').innerHTML = `
+    console.error('Submit failed:', err);
+
+    content.innerHTML = `
       <div class="modal-header">
         <div class="modal-score-circle" style="background:#fce8e6;">
-          <span class="material-icons" style="font-size:40px;color:#d93025;">error</span>
+          <span class="material-icons" style="font-size:40px;color:#d93025;">
+            error
+          </span>
         </div>
         <div>
           <div class="modal-title">Connection Error</div>
           <div class="modal-subtitle">${err.message}</div>
         </div>
       </div>
+
       <div class="modal-body">
-        <p style="font-size:14px;color:var(--text-secondary);">Make sure the CTFLab server is running at <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">${API_URL}</code> and try again.</p>
-        <button class="retry-btn" onclick="retrySubmit()">Try Again</button>
+        <p style="font-size:14px;color:var(--text-secondary);">
+          Make sure the server is running at
+          <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">
+            ${API_URL}
+          </code>
+          and try again.
+        </p>
+
+        <button class="retry-btn" onclick="submitAnswers(${JSON.stringify(answers).replace(/"/g, '&quot;')})">
+          Try Again
+        </button>
       </div>
     `;
   }
@@ -1328,7 +1377,7 @@ function showResults(data) {
     </div>
   ` : `
     <div style="margin-top:12px;background:#fff8e1;border-radius:8px;padding:12px 16px;font-size:13px;color:#e37400;">
-      ⚠️ ${message || `You need at least 8/10 correct to earn the flag. Review the emails below and try again!`}
+      ⚠️ ${message || `You need at least 10/10 correct to earn the flag. Review the emails below and try again!`}
     </div>
   `;
 
