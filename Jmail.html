@@ -697,6 +697,10 @@
 const API_URL = 'https://whcsctf-api-bdu8.onrender.com/api/phishing';
 // ─────────────────────────────────────────────────────────
 
+// NOTE: No correct answers or explanations are stored here.
+// All validation happens server-side. The client only holds
+// display data (labels, body copy, response option labels).
+
 const emails = [
   {
     id: 'email1',
@@ -710,8 +714,6 @@ const emails = [
     avatarColor: '#1a73e8',
     avatarLetter: 'C',
     label: 'Security',
-    correctResponse: 'use_reset_link',
-    explanation: 'This is a legitimate security email. The sender domain matches <strong>ctflab.io</strong>, includes specific device details for transparency, and contains no urgency pressure. The correct action is to use the provided reset link.',
     body: `
       <p>Hi there,</p>
       <p>We received a request to reset the password for your CTFLab account associated with <strong>you@ctflab.io</strong>. If you made this request, click the button below to reset your password.</p>
@@ -751,8 +753,6 @@ const emails = [
     avatarColor: '#137333',
     avatarLetter: 'I',
     label: 'IT',
-    correctResponse: 'complete_mfa',
-    explanation: 'This is a legitimate IT directive. The sender uses the official <strong>@ctflab.io</strong> domain, provides a specific deadline, links to an internal portal (<em>portal.ctflab.io</em>), and offers alternative contact methods — all hallmarks of authentic enterprise communication.',
     body: `
       <p>Hello,</p>
       <p>As part of our ongoing security improvements, <strong>all CTFLab employees are required to enroll in Multi-Factor Authentication (MFA) by this Friday, May 2nd, 2026</strong>.</p>
@@ -794,8 +794,6 @@ const emails = [
     avatarColor: '#4285f4',
     avatarLetter: 'U',
     label: 'Delivery',
-    correctResponse: 'report_phish_3',
-    explanation: 'This is a phishing email. Red flags: the sender domain is <strong>usps-track.net</strong> — not usps.com. There is no tracking number, no package description, artificial 1-hour urgency, and the "confirm address" link leads to the attacker\'s domain.',
     body: `
       <div style="background:#003087;padding:12px 20px;border-radius:4px 4px 0 0;margin:-1px -1px 0;">
         <span style="color:#fff;font-size:18px;font-weight:700;">USPS</span>
@@ -832,8 +830,6 @@ const emails = [
     avatarColor: '#e37400',
     avatarLetter: 'S',
     label: 'Work',
-    correctResponse: 'accept_invite',
-    explanation: 'This is a legitimate internal calendar invite. It comes from a verified <strong>@ctflab.io</strong> address, includes specific room and virtual link details, a structured agenda, and no urgency or suspicious links.',
     body: `
       <p>Hi team,</p>
       <p>You're invited to our <strong>Q2 Quarterly Security Review</strong> meeting. Please add this to your calendar.</p>
@@ -876,8 +872,6 @@ const emails = [
     avatarColor: '#c5221f',
     avatarLetter: 'C',
     label: 'Security',
-    correctResponse: 'report_phish_5',
-    explanation: 'This is a phishing email. The sender domain is <strong>ctfl4b-alert.com</strong> — note the "4" instead of "a" in "ctflab" (typosquatting). The extreme urgency ("30 minutes or permanent lock") and fear-based language are classic phishing tactics.',
     body: `
       <div style="background:#d93025;padding:14px 20px;border-radius:6px;color:#fff;margin-bottom:20px;text-align:center;">
         <p style="font-size:18px;font-weight:700;">⚠️ SECURITY ALERT</p>
@@ -911,8 +905,6 @@ const emails = [
     avatarColor: '#7627bb',
     avatarLetter: 'H',
     label: 'HR',
-    correctResponse: 'review_policy',
-    explanation: 'This is a legitimate HR communication. It comes from <strong>hr@ctflab.io</strong>, is addressed to all staff, uses passive language ("no immediate action required"), provides a reasonable future deadline, and refers to the official HR portal.',
     body: `
       <p>Dear CTFLab Team,</p>
       <p>Please be advised that our <strong>Remote Work Policy</strong> has been updated, effective <strong>May 15, 2026</strong>. This revision reflects our evolving hybrid work model and updated security requirements.</p>
@@ -951,8 +943,6 @@ const emails = [
     avatarColor: '#5f6368',
     avatarLetter: 'B',
     label: 'Finance',
-    correctResponse: 'report_phish_7',
-    explanation: 'This is a phishing email. Red flags: unknown vendor domain <strong>invoiceservices-llc.net</strong>, no prior relationship, vague invoice with no line items, excessive urgency ("OVERDUE"), and a suspicious download link. Legitimate invoices arrive from known vendors via established processes.',
     body: `
       <div style="border:2px solid #d93025;border-radius:6px;padding:14px 18px;margin-bottom:20px;background:#fce8e6;">
         <p style="color:#d93025;font-weight:700;font-size:15px;">⚠️ PAST DUE NOTICE</p>
@@ -994,8 +984,6 @@ const emails = [
     avatarColor: '#1a73e8',
     avatarLetter: 'C',
     label: 'Security',
-    correctResponse: 'report_phish_8',
-    explanation: 'This is a phishing email — look closely at the sender domain: <strong>ctflab-security.io</strong> is NOT the same as ctflab.io. This is a lookalike domain. Legitimate CTFLab security alerts always come from @ctflab.io. The "secure my account" link leads to the attacker\'s domain.',
     body: `
       <p>Hi,</p>
       <p>We noticed a new sign-in to your <strong>CTFLab account</strong>. Here are the details:</p>
@@ -1034,8 +1022,6 @@ const emails = [
     avatarColor: '#0097a7',
     avatarLetter: 'D',
     label: 'Documents',
-    correctResponse: 'report_phish_9',
-    explanation: 'This is a phishing email. There is no named sender, no document title, no context for why it was shared, and the link goes to a suspicious domain <strong>docs-share.net</strong>. Legitimate document-sharing notifications (Google Drive, SharePoint, etc.) always identify the sender and document name.',
     body: `
       <div style="text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:20px;">
         <span class="material-icons" style="font-size:48px;color:#1a73e8;">description</span>
@@ -1068,10 +1054,8 @@ const emails = [
     avatarColor: '#d93025',
     avatarLetter: 'A',
     label: 'Urgent',
-    correctResponse: 'report_phish_10',
-    explanation: 'This is a phishing email — every element is a red flag. The domain <strong>ctflab-verify.com</strong> is not ctflab.io. "FINAL NOTICE," "30 MINUTES," "permanent deletion," all-caps text, and extreme urgency with no context are the hallmarks of a fear-based phishing attack.',
     body: `
-      <div style="background:#7f0000;padding:16px 20px;border-radius:6px;color:#fff;margin-bottom:20px;text-align:center;animation: pulse 1s infinite;">
+      <div style="background:#7f0000;padding:16px 20px;border-radius:6px;color:#fff;margin-bottom:20px;text-align:center;">
         <p style="font-size:20px;font-weight:700;">🚨 FINAL NOTICE</p>
         <p style="font-size:13px;margin-top:4px;opacity:0.9;">URGENT – IMMEDIATE ACTION REQUIRED</p>
       </div>
@@ -1086,10 +1070,10 @@ const emails = [
       <p class="sig">Account Management Team<br>CTFLab Support<br>account-team@ctflab-verify.com</p>
     `,
     responses: [
-      { id: 'verify_now_10',    label: '⚡ Verify account immediately!' },
-      { id: 'report_phish_10',  label: '🚨 Report as phishing — delete email' },
+      { id: 'verify_now_10',     label: '⚡ Verify account immediately!' },
+      { id: 'report_phish_10',   label: '🚨 Report as phishing — delete email' },
       { id: 'contact_support_10',label: '📞 Contact official CTFLab support to check' },
-      { id: 'forward_sec_10',   label: '📤 Forward to the security team' },
+      { id: 'forward_sec_10',    label: '📤 Forward to the security team' },
     ]
   }
 ];
@@ -1143,34 +1127,13 @@ function openEmail(emailId) {
   detailView.classList.add('active');
   detailView.scrollTop = 0;
 
-  // Subject line
   document.getElementById('detail-subject-line').innerHTML = `
     <div class="detail-subject-text">${email.subject}</div>
     <div class="label-chip">${email.label}</div>
   `;
 
-  // Thread
   const isAnswered = !!answers[email.id];
   const selectedResponseId = answers[email.id];
-
-  const responsesHTML = isAnswered
-    ? `<div class="already-answered-note"><span class="material-icons" style="font-size:18px;color:var(--green);">check_circle</span> Response recorded. Return to inbox to review other emails.</div>`
-    : `
-      <div class="smart-reply-section">
-        <div class="smart-reply-label">
-          <span class="material-icons">auto_awesome</span>
-          Choose the best action to take:
-        </div>
-        <div class="smart-reply-chips">
-          ${email.responses.map(r => `
-            <button class="reply-chip ${selectedResponseId === r.id ? 'selected' : ''}"
-              onclick="selectResponse('${email.id}', '${r.id}', this)">
-              ${r.label}
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    `;
 
   document.getElementById('email-thread-container').innerHTML = `
     <div class="email-card">
@@ -1219,9 +1182,8 @@ function openEmail(emailId) {
 
 // ─── SELECT RESPONSE ──────────────────────────────────────
 function selectResponse(emailId, responseId, btn) {
-  if (answers[emailId]) return; // Already answered
+  if (answers[emailId]) return;
 
-  // Highlight selected chip
   const chips = btn.closest('.smart-reply-chips').querySelectorAll('.reply-chip');
   chips.forEach(c => c.classList.remove('selected'));
   btn.classList.add('selected');
@@ -1230,7 +1192,6 @@ function selectResponse(emailId, responseId, btn) {
   answers[emailId] = responseId;
   updateProgress();
 
-  // Brief delay then return to inbox (or check completion)
   setTimeout(() => {
     const answered = Object.keys(answers).length;
     if (answered >= 10) {
@@ -1309,13 +1270,14 @@ function retrySubmit() {
 }
 
 // ─── SHOW RESULTS ─────────────────────────────────────────
+// Explanations come from the server response, not from local data.
 function showResults(data) {
-  const { score, total, results, flag, success, message } = data;
+  const { score, total, results, flag, success, message, explanations } = data;
   const pct = Math.round((score / total) * 100);
 
   const circleColor = success ? 'var(--green)' : score >= 6 ? 'var(--yellow)' : '#d93025';
-  const circleBg = success ? 'var(--green-light)' : score >= 6 ? '#fff8e1' : 'var(--red-light)';
-  const titleText = success ? '🎉 Challenge Complete!' : score >= 6 ? '📚 Almost There!' : '🔁 Keep Practicing!';
+  const circleBg    = success ? 'var(--green-light)' : score >= 6 ? '#fff8e1' : 'var(--red-light)';
+  const titleText   = success ? '🎉 Challenge Complete!' : score >= 6 ? '📚 Almost There!' : '🔁 Keep Practicing!';
 
   const flagHTML = flag ? `
     <div style="margin-top:12px;">
@@ -1328,23 +1290,23 @@ function showResults(data) {
     </div>
   ` : `
     <div style="margin-top:12px;background:#fff8e1;border-radius:8px;padding:12px 16px;font-size:13px;color:#e37400;">
-      ⚠️ ${message || `You need at least 10/10 correct to earn the flag. Review the emails below and try again!`}
+      ⚠️ ${message || `You need 10/10 correct to earn the flag. Review the results below and try again!`}
     </div>
   `;
 
   const resultsItemsHTML = emails.map(email => {
-    const correct = results ? results[email.id] : false;
+    const correct    = results ? results[email.id] : false;
     const userAnswer = answers[email.id];
-    const userLabel = email.responses.find(r => r.id === userAnswer)?.label || '—';
+    const userLabel  = email.responses.find(r => r.id === userAnswer)?.label || '—';
+    // Explanation comes from the server, not from the local email object
+    const explanation = (explanations && explanations[email.id]) || '';
     return `
       <div class="result-item ${correct ? 'correct' : 'incorrect'}">
         <span class="material-icons result-icon">${correct ? 'check_circle' : 'cancel'}</span>
         <div class="result-meta">
           <div class="result-title">${email.subject}</div>
-          <div class="result-explanation">
-            Your action: <em>${userLabel}</em>
-          </div>
-          <div class="result-explanation" style="margin-top:3px;">${email.explanation}</div>
+          <div class="result-explanation">Your action: <em>${userLabel}</em></div>
+          ${explanation ? `<div class="result-explanation" style="margin-top:3px;">${explanation}</div>` : ''}
         </div>
       </div>
     `;
