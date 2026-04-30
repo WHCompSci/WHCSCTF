@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CTFLab Mail – Phishing Detection Challenge</title>
+  <title>J-Mail – Phishing Detection Challenge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -555,7 +555,7 @@
       <path d="M8 28h5V18l7 5.5 7-5.5v10h5V12L20 22 8 12v16z" fill="#EA4335"/>
       <path d="M13 18v10h14V18l-7 5.5L13 18z" fill="#FBBC05"/>
     </svg>
-    <span class="logo-text">CTFLab <span>Mail</span></span>
+    <span class="logo-text">J <span>Mail</span></span>
   </a>
 
   <div class="search-bar" onclick="document.querySelector('.search-bar input').focus()">
@@ -575,7 +575,7 @@
     <button class="icon-btn" title="Help"><span class="material-icons">help_outline</span></button>
     <button class="icon-btn" title="Settings"><span class="material-icons">settings</span></button>
     <button class="icon-btn" title="Apps"><span class="material-icons">apps</span></button>
-    <div class="avatar">Y</div>
+    <div class="avatar">J</div>
   </div>
 </header>
 
@@ -634,14 +634,6 @@
 
   <!-- Content -->
   <main class="gm-content">
-    <!-- Challenge Banner -->
-    <div class="challenge-banner">
-      <span class="material-icons">phishing</span>
-      <div>
-        <strong>Phishing Detection Challenge</strong>
-        <span> — Read each email carefully and choose the best response action. Some emails are legitimate, others are phishing attempts. Can you spot the difference?</span>
-      </div>
-    </div>
 
     <!-- Email List View -->
     <div id="email-list-view">
@@ -692,31 +684,24 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────
-// CONFIGURATION – Change this to your server's URL
 const API_URL = 'https://whcsctf-api-bdu8.onrender.com/api/phishing';
-// ─────────────────────────────────────────────────────────
-
-// NOTE: No correct answers or explanations are stored here.
-// All validation happens server-side. The client only holds
-// display data (labels, body copy, response option labels).
 
 const emails = [
   {
     id: 'email1',
-    from: 'CTFLab Security',
-    fromEmail: 'security@ctflab.io',
-    to: 'you@ctflab.io',
-    subject: 'Reset your CTFLab password',
-    preview: 'We received a request to reset the password for your CTFLab account. If you made this request…',
-    date: '9:14 AM',
-    fullDate: 'Mon, Apr 28, 2026, 9:14 AM',
+    from: 'WHCS Security',
+    fromEmail: 'security@WHCS.io',
+    to: 'you@WHCS.io',
+    subject: 'Reset your WHCS password',
+    preview: 'We received a request to reset the password for your WHCS account. If you made this request…',
+    date: 'Apr 30',
+    fullDate: 'Thu, Apr 30, 2026, 9:14 PM',
     avatarColor: '#1a73e8',
     avatarLetter: 'C',
     label: 'Security',
     body: `
       <p>Hi there,</p>
-      <p>We received a request to reset the password for your CTFLab account associated with <strong>you@ctflab.io</strong>. If you made this request, click the button below to reset your password.</p>
+      <p>We received a request to reset the password for your WHCS account associated with <strong>you@WHCS.io</strong>. If you made this request, click the button below to reset your password.</p>
       <div style="text-align:center;margin:24px 0;">
         <a href="#" onclick="return false;" class="email-btn">Reset Password</a>
       </div>
@@ -731,7 +716,7 @@ const emails = [
           <tr><td>Time</td><td>Mon, Apr 28, 2026, 9:12 AM EST</td></tr>
         </table>
       </div>
-      <p class="sig">— The CTFLab Security Team<br>security@ctflab.io &nbsp;·&nbsp; ctflab.io/security</p>
+      <p class="sig">— The WHCS Security Team<br>security@WHCS.io &nbsp;·&nbsp; WHCS.io/security</p>
     `,
     responses: [
       { id: 'use_reset_link',    label: '🔑 Use the reset link' },
@@ -744,21 +729,21 @@ const emails = [
   {
     id: 'email2',
     from: 'IT Support',
-    fromEmail: 'it-support@ctflab.io',
-    to: 'you@ctflab.io',
+    fromEmail: 'it-support@WHCS.io',
+    to: 'you@WHCS.io',
     subject: 'Action Required: MFA Enrollment by Friday',
-    preview: 'All CTFLab employees are required to enroll in Multi-Factor Authentication by this Friday, May 2nd…',
-    date: 'Apr 27',
-    fullDate: 'Sun, Apr 27, 2026, 2:31 PM',
+    preview: 'All WHCS employees are required to enroll in Multi-Factor Authentication by this Friday, May 2nd…',
+    date: 'Apr 30',
+    fullDate: 'Thu, Apr 30, 2026, 2:31 PM',
     avatarColor: '#137333',
     avatarLetter: 'I',
     label: 'IT',
     body: `
       <p>Hello,</p>
-      <p>As part of our ongoing security improvements, <strong>all CTFLab employees are required to enroll in Multi-Factor Authentication (MFA) by this Friday, May 2nd, 2026</strong>.</p>
+      <p>As part of our ongoing security improvements, <strong>all WHCS employees are required to enroll in Multi-Factor Authentication (MFA) by this Friday, May 2nd, 2026</strong>.</p>
       <p>To complete your enrollment, please follow these steps:</p>
       <ol style="padding-left:20px;margin:12px 0;line-height:2;">
-        <li>Visit the internal IT portal at <a href="#" onclick="return false;" style="color:var(--blue);">portal.ctflab.io/mfa</a></li>
+        <li>Visit the internal IT portal at <a href="#" onclick="return false;" style="color:var(--blue);">portal.WHCS.io/mfa</a></li>
         <li>Sign in with your employee credentials</li>
         <li>Follow the setup wizard to link your authenticator app</li>
         <li>Save your backup codes in a secure location</li>
@@ -768,11 +753,11 @@ const emails = [
       <div class="info-box">
         <table>
           <tr><td>Phone</td><td>Ext. 4400 (internal)</td></tr>
-          <tr><td>Email</td><td>helpdesk@ctflab.io</td></tr>
+          <tr><td>Email</td><td>helpdesk@WHCS.io</td></tr>
           <tr><td>Hours</td><td>Mon–Fri, 8 AM – 6 PM EST</td></tr>
         </table>
       </div>
-      <p class="sig">Thank you,<br>IT Support Team<br>CTFLab | it-support@ctflab.io</p>
+      <p class="sig">Thank you,<br>IT Support Team<br>WHCS | it-support@WHCS.io</p>
     `,
     responses: [
       { id: 'complete_mfa',     label: '📱 Complete MFA enrollment at the portal' },
@@ -786,11 +771,11 @@ const emails = [
     id: 'email3',
     from: 'USPS Delivery Notification',
     fromEmail: 'noreply@usps-track.net',
-    to: 'you@ctflab.io',
+    to: 'you@WHCS.io',
     subject: 'Delivery Failed – Confirm Your Address Within 1 Hour',
     preview: 'Your package could not be delivered. Confirm your shipping address within 1 hour to avoid return to sender…',
-    date: '11:03 AM',
-    fullDate: 'Mon, Apr 28, 2026, 11:03 AM',
+    date: 'Apr 29',
+    fullDate: 'Wed, Apr 29, 2026, 11:03 AM',
     avatarColor: '#4285f4',
     avatarLetter: 'U',
     label: 'Delivery',
@@ -820,15 +805,15 @@ const emails = [
 
   {
     id: 'email4',
-    from: 'Sarah Chen',
-    fromEmail: 'sarah.chen@ctflab.io',
-    to: 'team@ctflab.io',
+    from: 'Daniel Coutinho',
+    fromEmail: 'Coutinho.Daniel@WHCS.io',
+    to: 'team@WHCS.io',
     subject: '[Calendar Invite] Quarterly Security Review – Tomorrow 10:00 AM',
     preview: 'You\'re invited to the Q2 Security Review. Tomorrow, Apr 29 · 10:00–11:00 AM · Conference Room B…',
-    date: '8:45 AM',
-    fullDate: 'Mon, Apr 28, 2026, 8:45 AM',
-    avatarColor: '#e37400',
-    avatarLetter: 'S',
+    date: 'Apr 28',
+    fullDate: 'Tue, Apr 28, 2026, 8:45 AM',
+    avatarColor: '#5DAB9B',
+    avatarLetter: 'D',
     label: 'Work',
     body: `
       <p>Hi team,</p>
@@ -838,7 +823,7 @@ const emails = [
           <tr><td>📅 Date</td><td>Tuesday, April 29, 2026</td></tr>
           <tr><td>⏰ Time</td><td>10:00 AM – 11:00 AM EST</td></tr>
           <tr><td>📍 Location</td><td>Conference Room B / Virtual</td></tr>
-          <tr><td>🔗 Virtual</td><td><a href="#" onclick="return false;" style="color:var(--blue);">meet.ctflab.io/qsr-q2-2026</a></td></tr>
+          <tr><td>🔗 Virtual</td><td><a href="#" onclick="return false;" style="color:var(--blue);">meet.WHCS.io/qsr-q2-2026</a></td></tr>
           <tr><td>🆔 Meeting ID</td><td>847-291-066</td></tr>
         </table>
       </div>
@@ -850,7 +835,7 @@ const emails = [
         <li>Q2 security goals & OKRs</li>
       </ol>
       <p>Please come prepared with your team's Q1 security metrics. Let me know if you have any scheduling conflicts by end of day today.</p>
-      <p class="sig">Sarah Chen<br>Head of Security Operations · CTFLab<br>📞 Ext. 5502 &nbsp;·&nbsp; sarah.chen@ctflab.io</p>
+      <p class="sig">Daniel Coutinho<br>Head of Security Operations · WHCS<br>📞 Ext. 5502 &nbsp;·&nbsp; Coutinho.Daniel@WHCS.io</p>
     `,
     responses: [
       { id: 'accept_invite',    label: '✅ Accept the calendar invite' },
@@ -862,14 +847,14 @@ const emails = [
 
   {
     id: 'email5',
-    from: 'CTFLab Security Alert',
+    from: 'WHCS Security Alert',
     fromEmail: 'security@ctfl4b-alert.com',
-    to: 'you@ctflab.io',
+    to: 'you@WHCS.io',
     subject: '⚠️ Your Account Has Been Locked – Immediate Action Required',
-    preview: 'We have detected suspicious activity on your CTFLab account. Verify your identity within 30 minutes…',
-    date: '10:22 AM',
-    fullDate: 'Mon, Apr 28, 2026, 10:22 AM',
-    avatarColor: '#c5221f',
+    preview: 'We have detected suspicious activity on your WHCS account. Verify your identity within 30 minutes…',
+    date: 'Apr 28',
+    fullDate: 'Tue, Apr 28, 2026, 6:22 AM',
+    avatarColor: '#FFA420',
     avatarLetter: 'C',
     label: 'Security',
     body: `
@@ -877,18 +862,18 @@ const emails = [
         <p style="font-size:18px;font-weight:700;">⚠️ SECURITY ALERT</p>
         <p style="font-size:13px;margin-top:4px;opacity:0.9;">Immediate action required on your account</p>
       </div>
-      <p>We have detected <strong>suspicious login activity</strong> on your CTFLab account. To protect your data, your account access has been <strong>temporarily suspended</strong>.</p>
+      <p>We have detected <strong>suspicious login activity</strong> on your WHCS account. To protect your data, your account access has been <strong>temporarily suspended</strong>.</p>
       <p style="margin-top:12px;">You must verify your identity within the next <strong style="color:#d93025;">30 minutes</strong> or your account will be <strong style="color:#d93025;">permanently locked and all data deleted</strong>.</p>
       <div style="text-align:center;margin:24px 0;">
         <a href="#" onclick="return false;" class="email-btn danger">VERIFY MY IDENTITY NOW →</a>
       </div>
       <p style="color:var(--text-secondary);font-size:13px;">This link expires in 30 minutes. Do not share this link with anyone.</p>
-      <p class="sig">CTFLab Security Team<br>security@ctfl4b-alert.com</p>
+      <p class="sig">WHCS Security Team<br>security@ctfl4b-alert.com</p>
     `,
     responses: [
       { id: 'click_verify_5',   label: '🔒 Click to verify identity immediately' },
       { id: 'report_phish_5',   label: '🚨 Report as phishing — do not click' },
-      { id: 'call_support_5',   label: '📞 Call official CTFLab support to verify' },
+      { id: 'call_support_5',   label: '📞 Call official WHCS support to verify' },
       { id: 'check_account_5',  label: '🖥️ Check account by navigating manually' },
     ]
   },
@@ -896,17 +881,17 @@ const emails = [
   {
     id: 'email6',
     from: 'Human Resources',
-    fromEmail: 'hr@ctflab.io',
-    to: 'all@ctflab.io',
+    fromEmail: 'hr@WHCS.io',
+    to: 'all@WHCS.io',
     subject: 'Updated Remote Work Policy – Effective May 15th',
     preview: 'Please be advised that our Remote Work Policy has been updated effective May 15, 2026. Key changes include…',
-    date: 'Apr 25',
-    fullDate: 'Fri, Apr 25, 2026, 3:15 PM',
+    date: 'Apr 27',
+    fullDate: 'Mon, Apr 27, 2026, 3:15 PM',
     avatarColor: '#7627bb',
     avatarLetter: 'H',
     label: 'HR',
     body: `
-      <p>Dear CTFLab Team,</p>
+      <p>Dear WHCS Team,</p>
       <p>Please be advised that our <strong>Remote Work Policy</strong> has been updated, effective <strong>May 15, 2026</strong>. This revision reflects our evolving hybrid work model and updated security requirements.</p>
       <p><strong>Summary of key changes:</strong></p>
       <ul style="padding-left:20px;margin:12px 0;line-height:2;font-size:14px;">
@@ -918,10 +903,10 @@ const emails = [
       <p>The <strong>full policy document is attached</strong> to this email. Please review it at your convenience and acknowledge receipt by signing into the HR portal.</p>
       <div class="info-box">
         <p style="font-size:13px;"><strong>No immediate action is required.</strong> Acknowledgment deadline: May 10, 2026</p>
-        <p style="font-size:13px;margin-top:6px;">HR Portal: <a href="#" onclick="return false;" style="color:var(--blue);">hr.ctflab.io</a></p>
+        <p style="font-size:13px;margin-top:6px;">HR Portal: <a href="#" onclick="return false;" style="color:var(--blue);">hr.WHCS.io</a></p>
       </div>
-      <p>Questions? Contact your manager or reach out to the HR team directly at hr@ctflab.io.</p>
-      <p class="sig">Best regards,<br>Jessica Morgan<br>Director of Human Resources · CTFLab<br>hr@ctflab.io | Ext. 3310</p>
+      <p>Questions? Contact your manager or reach out to the HR team directly at hr@WHCS.io.</p>
+      <p class="sig">Best regards,<br>Jessica Morgan<br>Director of Human Resources · WHCS<br>hr@WHCS.io | Ext. 3310</p>
     `,
     responses: [
       { id: 'review_policy',    label: '📄 Review the attached policy document' },
@@ -935,11 +920,11 @@ const emails = [
     id: 'email7',
     from: 'BillingDept',
     fromEmail: 'billing@invoiceservices-llc.net',
-    to: 'you@ctflab.io',
+    to: 'you@WHCS.io',
     subject: 'Invoice #88321 – Payment OVERDUE – Immediate Action Required',
     preview: 'Invoice #88321 is past due. Immediate payment required to avoid service interruption. Amount due: $2,847.00…',
-    date: '7:58 AM',
-    fullDate: 'Mon, Apr 28, 2026, 7:58 AM',
+    date: 'Apr 26',
+    fullDate: 'Sun, Apr 26, 2026, 7:58 AM',
     avatarColor: '#5f6368',
     avatarLetter: 'B',
     label: 'Finance',
@@ -974,19 +959,19 @@ const emails = [
 
   {
     id: 'email8',
-    from: 'CTFLab Account Security',
-    fromEmail: 'alerts@ctflab-security.io',
-    to: 'you@ctflab.io',
+    from: 'WHCS Account Security',
+    fromEmail: 'alerts@WHCS-security.io',
+    to: 'you@WHCS.io',
     subject: 'New sign-in to your account from an unrecognized device',
     preview: 'We noticed a new sign-in from Chrome on Windows 11 in Newark, NJ at 6:31 AM. If this was you, no action required…',
-    date: '6:34 AM',
-    fullDate: 'Mon, Apr 28, 2026, 6:34 AM',
+    date: 'Apr 25',
+    fullDate: 'Sat, Apr 25, 2026, 6:34 AM',
     avatarColor: '#1a73e8',
     avatarLetter: 'C',
     label: 'Security',
     body: `
       <p>Hi,</p>
-      <p>We noticed a new sign-in to your <strong>CTFLab account</strong>. Here are the details:</p>
+      <p>We noticed a new sign-in to your <strong>WHCS account</strong>. Here are the details:</p>
       <div class="info-box">
         <table>
           <tr><td>Device</td><td>Chrome 124 on Windows 11</td></tr>
@@ -1000,7 +985,7 @@ const emails = [
       <div style="text-align:center;margin:24px 0;">
         <a href="#" onclick="return false;" class="email-btn">This wasn't me – Secure My Account →</a>
       </div>
-      <p class="sig">CTFLab Account Security Team<br>alerts@ctflab-security.io</p>
+      <p class="sig">WHCS Account Security Team<br>alerts@WHCS-security.io</p>
     `,
     responses: [
       { id: 'ignore_login_8',   label: '👍 This was me — no action needed' },
@@ -1014,11 +999,11 @@ const emails = [
     id: 'email9',
     from: 'Docs Sharing Service',
     fromEmail: 'no-reply@docs-share.net',
-    to: 'you@ctflab.io',
+    to: 'you@WHCS.io',
     subject: 'Someone shared a document with you',
     preview: 'A document has been shared with you. Click here to view. You have Editor access. Link expires in 48 hours…',
-    date: '2:17 PM',
-    fullDate: 'Mon, Apr 28, 2026, 2:17 PM',
+    date: 'Apr 24',
+    fullDate: 'Fri, Apr 24, 2026, 2:17 PM',
     avatarColor: '#0097a7',
     avatarLetter: 'D',
     label: 'Documents',
@@ -1045,12 +1030,12 @@ const emails = [
   {
     id: 'email10',
     from: 'Account Management Team',
-    fromEmail: 'account-team@ctflab-verify.com',
-    to: 'you@ctflab.io',
+    fromEmail: 'account-team@WHCS-verify.com',
+    to: 'you@WHCS.io',
     subject: '🚨 FINAL NOTICE: Your Account Will Be Closed in 30 Minutes',
-    preview: 'This is your last warning. Your CTFLab account is scheduled for permanent deletion unless you verify…',
-    date: '12:00 PM',
-    fullDate: 'Mon, Apr 28, 2026, 12:00 PM',
+    preview: 'This is your last warning. Your WHCS account is scheduled for permanent deletion unless you verify…',
+    date: 'Thu 23',
+    fullDate: 'Mon, Apr 23, 2026, 12:00 PM',
     avatarColor: '#d93025',
     avatarLetter: 'A',
     label: 'Urgent',
@@ -1061,18 +1046,18 @@ const emails = [
       </div>
       <p><strong>This is your last and final warning.</strong></p>
       <p style="margin-top:8px;">We have attempted to contact you <strong>multiple times</strong> regarding unauthorized activity detected on your account. You have repeatedly failed to respond.</p>
-      <p style="margin-top:12px;color:#d93025;font-weight:700;font-size:15px;">⚠️ Your CTFLab account is scheduled for PERMANENT DELETION in 30 MINUTES.</p>
+      <p style="margin-top:12px;color:#d93025;font-weight:700;font-size:15px;">⚠️ Your WHCS account is scheduled for PERMANENT DELETION in 30 MINUTES.</p>
       <p style="margin-top:12px;">All associated data, files, and records will be <strong>permanently and irreversibly deleted</strong> unless you verify your account information IMMEDIATELY.</p>
       <div style="text-align:center;margin:24px 0;">
         <a href="#" onclick="return false;" class="email-btn danger" style="font-size:16px;padding:14px 40px;">⚡ VERIFY NOW BEFORE IT'S TOO LATE</a>
       </div>
       <p style="color:var(--text-secondary);font-size:13px;text-align:center;"><em>Do NOT ignore this email. This is your only remaining opportunity.</em></p>
-      <p class="sig">Account Management Team<br>CTFLab Support<br>account-team@ctflab-verify.com</p>
+      <p class="sig">Account Management Team<br>WHCS Support<br>account-team@WHCS-verify.com</p>
     `,
     responses: [
       { id: 'verify_now_10',     label: '⚡ Verify account immediately!' },
       { id: 'report_phish_10',   label: '🚨 Report as phishing — delete email' },
-      { id: 'contact_support_10',label: '📞 Contact official CTFLab support to check' },
+      { id: 'contact_support_10',label: '📞 Contact official WHCS support to check' },
       { id: 'forward_sec_10',    label: '📤 Forward to the security team' },
     ]
   }
@@ -1258,7 +1243,7 @@ async function submitAnswers() {
         </div>
       </div>
       <div class="modal-body">
-        <p style="font-size:14px;color:var(--text-secondary);">Make sure the CTFLab server is running at <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">${API_URL}</code> and try again.</p>
+        <p style="font-size:14px;color:var(--text-secondary);">Make sure the WHCS server is running at <code style="background:#f1f3f4;padding:2px 6px;border-radius:4px;">${API_URL}</code> and try again.</p>
         <button class="retry-btn" onclick="retrySubmit()">Try Again</button>
       </div>
     `;
