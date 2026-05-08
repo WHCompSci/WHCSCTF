@@ -438,38 +438,41 @@
     CTF HINT: "The real secret isn't in the dough."
     Look somewhere else. Network tab, perhaps?
   -->
+<script>
+  window.addEventListener('load', async function () {
+    try {
+      // 1. Retrieve the security token from the previous page's session
+      let token = sessionStorage.getItem('whcs_token');
 
-  <script>
-    window.addEventListener('load', function () {
-      fetch("https://whcsctf-api-bdu8.onrender.com/api/bakery")
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          var flag = null;
-          var categories = Object.values(data);
-          for (var i = 0; i < categories.length; i++) {
-            var list = categories[i];
-            for (var j = 0; j < list.length; j++) {
-              if (list[j].name === 'Bakery Bread') {
-                flag = list[j].answer;
-                break;
-              }
-            }
-            if (flag) break;
-          }
+      // 2. Fallback: If they linked here directly, perform the handshake
+      if (!token) {
+        const sessionRes = await fetch('https://whcsctf-api-bdu8.onrender.com/api/session');
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          token = sessionData.token;
+          sessionStorage.setItem('whcs_token', token);
+        }
+      }
 
-          if (!flag) return; 
+      // 3. Call the bakery API with the token in the header
+      // Your server will attach 'X-CTF-Flag' and 'X-Bakery-Secret' to this response
+      const response = await fetch("https://whcsctf-api-bdu8.onrender.com/api/bakery", {
+        method: "GET",
+        headers: {
+          "x-ctf-token": token || ""
+        }
+      });
 
-          fetch(window.location.href, {
-            method: 'HEAD',
-            headers: {
-              'X-CTF-Flag'  : flag,
-              'X-Hint'      : 'Nice work checking the network tab!',
-              'X-Bakery-Secret': 'The starter is named Gerald.'
-            }
-          }).catch(function () {});
-        })
-        .catch(function () {});
-    });
-  </script>
+      if (response.ok) {
+        console.log("Bakery data fetched. The secret is in the response headers!");
+      } else {
+        console.error("Bakery challenge failed to load: " + response.status);
+      }
+
+    } catch (err) {
+      console.error("Connection error:", err);
+    }
+  });
+</script>
 </body>
 </html>
