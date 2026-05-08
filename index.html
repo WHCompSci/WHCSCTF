@@ -201,8 +201,7 @@ let activePlay  = null;
 let activeTags  = new Set();   // currently selected filter tags
 
 /* ════════════════════════════════════════════════════════
-   LOCALSTORAGE — keyed by challenge name (stable across
-   JSON edits as long as names don't change)
+   LOCALSTORAGE
    ════════════════════════════════════════════════════════ */
 function saveProgress() {
   const solvedNames = [];
@@ -242,13 +241,10 @@ function loadProgress() {
   document.getElementById('totalScore').textContent = score;
 }
 
-
 /* ════════════════════════════════════════════════════════
    SESSION TOKEN SYSTEM
    ════════════════════════════════════════════════════════ */
 async function initSessionToken() {
-  await initSessionToken();
-  let rawData;
   try {
     const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/session");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -261,11 +257,14 @@ async function initSessionToken() {
   }
 }
 
-
 /* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
    ════════════════════════════════════════════════════════ */
 async function init() {
+  // 1. Fire up the security handshake first
+  await initSessionToken();
+
+  // 2. Fetch the challenges payload
   let rawData;
   try {
     const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges");
@@ -277,13 +276,10 @@ async function init() {
     return;
   }
 
-  /* Hash every answer; plaintext lives only in rawData which
-     goes out of scope after this loop. */
+  // Loop through and assign everything as before
   for (const cat of Object.keys(rawData)) {
     challenges[cat] = [];
     for (const src of rawData[cat]) {
-      const answers = Array.isArray(src.answer) ? src.answer : [src.answer];
-      const hashes  = await Promise.all(answers.map(a => sha256(a)));
       challenges[cat].push({
         name:         src.name,
         points:       src.points,
@@ -291,7 +287,7 @@ async function init() {
         description:  src.description,
         path:         src.path || null,
         image:        src.image || null,
-        answerHashes: src.answerHashes || [],  // ← use what the server sent
+        answerHashes: src.answerHashes || [], 
         solved:       false,
         solvedAt:     null,
       });
