@@ -262,12 +262,19 @@ async function initSessionToken() {
    ════════════════════════════════════════════════════════ */
 async function init() {
   // 1. Fire up the security handshake first
-  await initSessionToken();
+  const token = await initSessionToken();
 
   // 2. Fetch the challenges payload
   let rawData;
   try {
-    const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges");
+    const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // This is the key line that satisfies your server's 'requireCtfToken' middleware
+        "x-ctf-token": token
+      }
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     rawData = await res.json();
   } catch (err) {
