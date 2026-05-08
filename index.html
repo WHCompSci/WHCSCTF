@@ -264,6 +264,12 @@ async function init() {
   // 1. Fire up the security handshake first
   const token = await initSessionToken();
 
+  if (!token) {
+    document.getElementById('loadState').textContent =
+      `⚠ Security Handshake Failed. Please refresh or check CORS settings.`;
+    return;
+  }
+  
   // 2. Fetch the challenges payload
   let rawData;
   try {

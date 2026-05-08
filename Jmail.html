@@ -684,7 +684,14 @@
 </div>
 
 <script>
-const API_URL = 'https://whcsctf-api-bdu8.onrender.com/api/phishing';
+const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/phishing", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "x-ctf-token": sessionStorage.getItem('whcs_token') // Pull from storage
+    },
+    body: JSON.stringify({ answers: userAnswers })
+});
 
 const emails = [
   {
