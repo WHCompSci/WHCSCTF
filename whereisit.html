@@ -68,21 +68,44 @@
     there is always something underneath.
   </p>
 
-  <script>
+    <script>
     async function loadFlag() {
-      try {
-        const response = await fetch('https://whcsctf-api-bdu8.onrender.com/api/whereisit');
+        try {
+        // 1. Try to grab the token left in sessionStorage by the main board
+        let token = sessionStorage.getItem('whcs_token');
+
+        // 2. Fallback: If they opened this page directly, fetch a token right now
+        if (!token) {
+            const sessionRes = await fetch('https://whcsctf-api-bdu8.onrender.com/api/session');
+            if (sessionRes.ok) {
+            const sessionData = await sessionRes.json();
+            token = sessionData.token;
+            sessionStorage.setItem('whcs_token', token); // Save it for later
+            }
+        }
+
+        // 3. Request the flag using the token in the custom header
+        const response = await fetch('https://whcsctf-api-bdu8.onrender.com/api/whereisit', {
+            headers: {
+            'X-CTF-Token': token || ''
+            }
+        });
 
         const data = await response.json();
 
-        document.getElementById('flag').textContent = data.flag;
-      } catch (err) {
+        // Show the flag, or show the security error if they tried to bypass it
+        if (data.error) {
+            document.getElementById('flag').textContent = data.error;
+        } else {
+            document.getElementById('flag').textContent = data.flag;
+        }
+        } catch (err) {
         document.getElementById('flag').textContent = 'nothing found';
-      }
+        }
     }
 
     loadFlag();
-  </script>
+    </script>
 
 </body>
 </html>

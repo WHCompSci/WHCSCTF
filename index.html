@@ -242,6 +242,26 @@ function loadProgress() {
   document.getElementById('totalScore').textContent = score;
 }
 
+
+/* ════════════════════════════════════════════════════════
+   SESSION TOKEN SYSTEM
+   ════════════════════════════════════════════════════════ */
+async function initSessionToken() {
+  await initSessionToken();
+  let rawData;
+  try {
+    const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/session");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    // Save token to sessionStorage so ALL subpages can access it
+    sessionStorage.setItem('whcs_token', data.token);
+  } catch (err) {
+    console.error("Security handshake failed:", err);
+  }
+}
+
+
 /* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
    ════════════════════════════════════════════════════════ */
