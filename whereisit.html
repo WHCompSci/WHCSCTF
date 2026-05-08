@@ -1,0 +1,88 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>nothing to see here</title>
+
+  <style>
+    body {
+      background: white;
+      color: black;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 60px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      margin: 18px 0;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .hidden-flag {
+      color: white;
+      user-select: text;
+      cursor: text;
+    }
+
+    .tiny {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>look closer.</h1>
+
+  <p>
+    Most people skim pages.
+  </p>
+
+  <p>
+    The important things are usually hidden in plain sight.
+  </p>
+
+  <p>
+    Keep on looking
+  </p>
+
+  <p>
+    Or maybe the browser already knows more than you do.
+  </p>
+
+  <p class="hidden-flag" id="flag">
+    loading...
+  </p>
+
+  <p class="tiny">
+    there is always something underneath.
+  </p>
+
+  <script>
+    async function loadFlag() {
+      try {
+        const response = await fetch('https://whcsctf-api-bdu8.onrender.com/api/whereisit');
+
+        const data = await response.json();
+
+        document.getElementById('flag').textContent = data.flag;
+      } catch (err) {
+        document.getElementById('flag').textContent = 'nothing found';
+      }
+    }
+
+    loadFlag();
+  </script>
+
+</body>
+</html>
