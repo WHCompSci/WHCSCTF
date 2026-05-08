@@ -249,11 +249,11 @@ async function initSessionToken() {
     const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/session");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    
-    // Save token to sessionStorage so ALL subpages can access it
     sessionStorage.setItem('whcs_token', data.token);
+    return data.token; // ← this line was missing
   } catch (err) {
     console.error("Security handshake failed:", err);
+    return null;
   }
 }
 
@@ -277,7 +277,6 @@ async function init() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // This is the key line that satisfies your server's 'requireCtfToken' middleware
         "x-ctf-token": token
       }
     });
