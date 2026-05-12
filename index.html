@@ -278,7 +278,7 @@ function getOrCreateUser() {
     name = prompt("Enter your name for the leaderboard:", "Enter Here");
     // Increase slice to -8 or -10 for the fallback name to ensure uniqueness
     if (!name || name.trim() === "") {
-      name = "Anon-" + uuid.split('-')[1] + uuid.slice(-4); 
+      name = "Anonymous-" + uuid.split('-')[1] + uuid.slice(-8); 
     }
     localStorage.setItem('whcs_user_name', name);
   }
