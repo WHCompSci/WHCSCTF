@@ -274,11 +274,15 @@ function getOrCreateUser() {
     localStorage.setItem('whcs_uuid', uuid);
   }
 
+  // 2. Handle Name - This now pauses the execution
   if (!name) {
-    name = prompt("Enter your name for the leaderboard:", "Enter Here");
-    // Increase slice to -8 or -10 for the fallback name to ensure uniqueness
-    if (!name || name.trim() === "") {
-      name = "Anonymous-" + uuid.split('-')[1] + uuid.slice(-8); 
+    let inputName = prompt("Enter your name for the leaderboard:");
+    
+    if (!inputName || inputName.trim() === "") {
+      // Fallback if they cancel or leave it blank
+      name = "Anonymous-" + uuid.split('-')[1] + uuid.slice(-8);
+    } else {
+      name = inputName.trim();
     }
     localStorage.setItem('whcs_user_name', name);
   }
