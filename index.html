@@ -555,20 +555,32 @@ document.getElementById('alreadyBtn').addEventListener('click', () => {
 
 /* ════════════════════════════════════════════════════════
    SUBMIT
-   ════════════════════════════════════════════════════════ */
-document.getElementById('subBtn').addEventListener('click', async () => {
+   ════════════════════════════════════════════════════════ */document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
   
-  const { uuid, name } = getOrCreateUser(); // Get identity
-  const { ch } = activePlay;
-  const raw = document.getElementById('ansInput').value.trim();
-  const fb = document.getElementById('fb');
+  const fb  = document.getElementById('fb');
   const inp = document.getElementById('ansInput');
+  const raw = inp.value.trim();
 
+  // 1. Basic validation
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
 
-  // LOG TO GOOGLE SHEETS
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRN27QKRMMFK0wOLqlC66rKVroTqOwGzYedAlO8uc4jrSq8N1LXEs3JWGi701y37Aq0w/exec";
+  const { ch } = activePlay;
+  if (!ch.answerHashes?.length) {
+    fb.textContent = 'No answer set for this challenge yet.';
+    fb.className   = 'fb bad';
+    return;
+  }
+
+  // 2. Identify the user (pauses for prompt if name is missing)
+  const { uuid, name } = await getOrCreateUser(); 
+
+  // 3. Calculate hash and check correctness ONCE
+  const h = await sha256(raw);
+  const isCorrect = ch.answerHashes.includes(h);
+
+  // 4. LOG TO GOOGLE SHEETS
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz34so9c8iiqbtmqWG0Ku43tefMNK7d2FAneYq1JXEJ8GS1BDS2C_9_UHSBWV96QIxQ6g/exec";
   
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
@@ -579,35 +591,33 @@ document.getElementById('subBtn').addEventListener('click', async () => {
       name: name,
       challengeName: ch.name,
       response: raw,
+      points: isCorrect ? ch.points : 0, 
       timestamp: new Date().toLocaleString()
     })
-  });
+  }).catch(err => console.error("Logging failed:", err));
 
-  if (!ch.answerHashes?.length) {
-    fb.textContent = 'No answer set for this challenge yet.';
-    fb.className   = 'fb bad';
-    return;
-  }
-
-  const h = await sha256(raw);
-  if (ch.answerHashes.includes(h)) {
+  // 5. Handle the result UI
+  if (isCorrect) {
     const now   = new Date().toISOString();
     ch.solved   = true;
     ch.solvedAt = now;
     score      += ch.points;
 
+    // Update UI Score
     const el = document.getElementById('totalScore');
     el.textContent = score;
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 400);
-    saveProgress();
+    
+    saveProgress(); // Persist to localStorage
 
+    // Switch Modal View
     document.getElementById('ansSection').style.display    = 'none';
     document.getElementById('solvedSection').style.display = 'block';
     document.getElementById('solvedTs').textContent        = formatTs(now);
     document.getElementById('fbAlready').textContent       = '';
 
-    renderBoard();
+    renderBoard(); // Refresh the grid
     showToast(`+${ch.points} pts — "${ch.name}" solved`);
     setTimeout(closePlay, 2200);
   } else {
