@@ -531,6 +531,25 @@ document.getElementById('subBtn').addEventListener('click', async () => {
   const inp = document.getElementById('ansInput');
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
+
+  // ─── NEW: SEND DATA TO GOOGLE SHEET ───
+  // Replace the placeholder string below with your actual Web App URL from Step 2
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQUfX6LQYXUdXNgO6s9UCfMxEgIBzR7qiaYFj1a25jEbKQuSZ6uoPAPGgDIVdyxD3q7A/exec"; 
+  
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors", // 'no-cors' prevents pesky browser cross-origin errors
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      challengeName: ch.name,
+      response: raw,
+      timestamp: new Date().toLocaleString()
+    })
+  }).catch(err => console.error("Logging failed:", err));
+  // ──────────────────────────────────────
+
   if (!ch.answerHashes?.length) {
     fb.textContent = 'No answer set for this challenge yet.';
     fb.className   = 'fb bad';
