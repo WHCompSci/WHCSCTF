@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WHCS Challenge Board</title>
@@ -20,7 +22,7 @@
     --sh-lg:0 20px 60px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
     --r:10px;--rs:6px;
   }
-  html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x: hidden}
+  html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text3);line-height:1.5;overflow-x: hidden}
 
   /* ── HEADER ── */
   header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-sm)}
@@ -124,7 +126,8 @@
     <div class="logo">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
     </div>
-    <span class="site-title">WHCS Challenge Board</span>
+    <span class="site-title" style="cursor:pointer;" id="navHome">WHCS Challenge Board</span>
+    <span id="navLeaderboard" style="margin-left: 20px; font-size: 0.9rem; font-weight: 500; color: var(--text-2); cursor: pointer; transition: color 0.2s;">Leaderboard</span>
   </div>
   <div class="h-right">
     <div class="score-pill">
@@ -139,6 +142,20 @@
   <span class="filter-label">Filter by tag</span>
   <div class="filter-tags" id="filterTags"></div>
   <button class="filter-clear" id="filterClear">Clear filters</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboardPage" style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto;">
+  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+     <h2 class="cat-name" style="color:#000;">Global Leaderboard</h2>
+     <div class="cat-line"></div>
+  </div>
+  
+  <div style="background: #fff; border: 1px solid var(--border); border-radius: var(--r); padding: 2rem; box-shadow: var(--sh-md);">
+    <div style="height: 500px; position: relative;">
+      <canvas id="leaderboardChart"></canvas>
+    </div>
+  </div>
 </div>
 
 <!-- BOARD -->
@@ -657,6 +674,89 @@ function showToast(msg) {
 }
 
 init();
+
+/* ════════════════════════════════════════════════════════
+   LEADERBOARD GRAPH & VIEW NAVIGATION
+   ════════════════════════════════════════════════════════ */
+let leaderboardChartInstance = null;
+const LEADERBOARD_API_URL = "https://script.google.com/macros/s/AKfycbz34so9c8iiqbtmqWG0Ku43tefMNK7d2FAneYq1JXEJ8GS1BDS2C_9_UHSBWV96QIxQ6g/exec";
+
+// 1. Toggle Page Views
+document.getElementById('navLeaderboard').addEventListener('click', () => {
+  document.getElementById('boardMain').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'none';
+  document.getElementById('leaderboardPage').style.display = 'block';
+  document.getElementById('navLeaderboard').style.color = 'var(--accent)';
+  renderLeaderboard();
+});
+
+document.getElementById('navHome').addEventListener('click', () => {
+  document.getElementById('boardMain').style.display = 'block';
+  document.getElementById('filterBar').style.display = 'flex';
+  document.getElementById('leaderboardPage').style.display = 'none';
+  document.getElementById('navLeaderboard').style.color = 'var(--text-2)';
+});
+
+// 2. Fetch and Draw Chart
+async function renderLeaderboard() {
+  const canvas = document.getElementById('leaderboardChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  try {
+    const response = await fetch(LEADERBOARD_API_URL);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const topPlayers = await response.json();
+
+    const colors = [
+      '#2d6a4f', '#e63946', '#457b9d', '#f1c40f', '#8e44ad', 
+      '#e67e22', '#2ecc71', '#34495e', '#ff006e', '#3a86ff'
+    ];
+
+    const datasets = topPlayers.map((player, index) => ({
+      label: player.name,
+      data: player.data, 
+      borderColor: colors[index % colors.length],
+      backgroundColor: colors[index % colors.length],
+      tension: 0.3,
+      pointRadius: 4,
+      fill: false
+    }));
+
+    // Destroy prior chart container tracking if switching pages rapidly
+    if (leaderboardChartInstance) {
+      leaderboardChartInstance.destroy();
+    }
+
+    leaderboardChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: { 
+              unit: 'day',
+              displayFormats: { day: 'MMM d' }
+            },
+            title: { display: true, text: 'Timeline Event' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Total Points' }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Leaderboard load failed:", err);
+  }
+}
 </script>
 </body>
 </html>
