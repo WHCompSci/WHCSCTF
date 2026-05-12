@@ -265,20 +265,26 @@ function getOrCreateUser() {
   let name = localStorage.getItem('whcs_user_name');
 
   if (!uuid) {
-    // Generate a simple UUID
-    uuid = 'user-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    const part1 = Math.random().toString(36).substring(2, 6);
+    const part2 = Math.random().toString(36).substring(2, 6);
+    const part3 = Math.random().toString(36).substring(2, 6);
+    const ts = Date.now().toString(36);
+    
+    uuid = `whcs-${part1}-${part2}-${part3}-${ts}`;
     localStorage.setItem('whcs_uuid', uuid);
   }
 
   if (!name) {
-    name = prompt("Enter a nickname for the leaderboard:", "Anonymous Hacker");
-    if (!name || name.trim() === "") name = "Anonymous-" + uuid.slice(-4);
+    name = prompt("Enter your name for the leaderboard:", "Enter Here");
+    // Increase slice to -8 or -10 for the fallback name to ensure uniqueness
+    if (!name || name.trim() === "") {
+      name = "Anon-" + uuid.split('-')[1] + uuid.slice(-4); 
+    }
     localStorage.setItem('whcs_user_name', name);
   }
 
   return { uuid, name };
 }
-
 
 /* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
@@ -558,7 +564,7 @@ document.getElementById('subBtn').addEventListener('click', async () => {
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
 
   // LOG TO GOOGLE SHEETS
-  const GOOGLE_SCRIPT_URL = "YOUR_NEW_DEPLOYMENT_URL";
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRN27QKRMMFK0wOLqlC66rKVroTqOwGzYedAlO8uc4jrSq8N1LXEs3JWGi701y37Aq0w/exec";
   
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
