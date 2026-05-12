@@ -258,6 +258,29 @@ async function initSessionToken() {
 }
 
 /* ════════════════════════════════════════════════════════
+   Get User's name
+   ════════════════════════════════════════════════════════ */
+function getOrCreateUser() {
+  let uuid = localStorage.getItem('whcs_uuid');
+  let name = localStorage.getItem('whcs_user_name');
+
+  if (!uuid) {
+    // Generate a simple UUID
+    uuid = 'user-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    localStorage.setItem('whcs_uuid', uuid);
+  }
+
+  if (!name) {
+    name = prompt("Enter a nickname for the leaderboard:", "Anonymous Hacker");
+    if (!name || name.trim() === "") name = "Anonymous-" + uuid.slice(-4);
+    localStorage.setItem('whcs_user_name', name);
+  }
+
+  return { uuid, name };
+}
+
+
+/* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
    ════════════════════════════════════════════════════════ */
 async function init() {
@@ -525,30 +548,30 @@ document.getElementById('alreadyBtn').addEventListener('click', () => {
    ════════════════════════════════════════════════════════ */
 document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
+  
+  const { uuid, name } = getOrCreateUser(); // Get identity
   const { ch } = activePlay;
   const raw = document.getElementById('ansInput').value.trim();
-  const fb  = document.getElementById('fb');
+  const fb = document.getElementById('fb');
   const inp = document.getElementById('ansInput');
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
 
-  // ─── NEW: SEND DATA TO GOOGLE SHEET ───
-  // Replace the placeholder string below with your actual Web App URL from Step 2
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQUfX6LQYXUdXNgO6s9UCfMxEgIBzR7qiaYFj1a25jEbKQuSZ6uoPAPGgDIVdyxD3q7A/exec"; 
+  // LOG TO GOOGLE SHEETS
+  const GOOGLE_SCRIPT_URL = "YOUR_NEW_DEPLOYMENT_URL";
   
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
-    mode: "no-cors", // 'no-cors' prevents pesky browser cross-origin errors
-    headers: {
-      "Content-Type": "application/json"
-    },
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      uuid: uuid,
+      name: name,
       challengeName: ch.name,
       response: raw,
       timestamp: new Date().toLocaleString()
     })
-  }).catch(err => console.error("Logging failed:", err));
-  // ──────────────────────────────────────
+  });
 
   if (!ch.answerHashes?.length) {
     fb.textContent = 'No answer set for this challenge yet.';
