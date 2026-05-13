@@ -215,7 +215,9 @@ async function sha256(str) {
 const challenges = {};   // { category: [challenge, …] }
 let score       = 0;
 let activePlay  = null;
-let activeTags  = new Set();   // currently selected filter tags
+let activeTags  = new Set();
+
+const LEADERBOARD_API_URL = "https://script.google.com/macros/s/AKfycbw7ToUyfnMh8WbNZ_L6XTiEEsKM8jE24qUUCOOpgletJtSXHFhuz500OWKsGRAOi30qDA/exec";
 
 /* ════════════════════════════════════════════════════════
    LOCALSTORAGE
@@ -267,7 +269,7 @@ async function initSessionToken() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     sessionStorage.setItem('whcs_token', data.token);
-    return data.token; // ← this line was missing
+    return data.token;
   } catch (err) {
     console.error("Security handshake failed:", err);
     return null;
@@ -275,75 +277,85 @@ async function initSessionToken() {
 }
 
 /* ════════════════════════════════════════════════════════
-   Get User's name
+   GET OR CREATE USER
+   ────────────────────────────────────────────────────────
+   FIX 1: No infinite loop. If the user cancels or leaves
+   the name blank, we return { uuid, name: null } immediately.
+   The submit handler is responsible for showing a friendly
+   error and stopping — it will NOT call this again in a loop.
+
+   FIX 2: The name-validation fetch is wrapped in a try/catch
+   that FAILS OPEN. If the Google Apps Script endpoint is
+   unreachable (CORS redirect, network error, etc.) the name
+   is accepted anyway rather than trapping the user forever.
    ════════════════════════════════════════════════════════ */
 async function getOrCreateUser() {
+  // Ensure a stable UUID exists
   let uuid = localStorage.getItem('whcs_uuid');
-  let name = localStorage.getItem('whcs_user_name');
-
-  // 1. Ensure UUID exists
   if (!uuid) {
-    const part1 = Math.random().toString(36).substring(2, 6);
-    const part2 = Math.random().toString(36).substring(2, 6);
-    const ts = Date.now().toString(36);
-    uuid = `whcs-${part1}-${part2}-${ts}`;
+    const p1 = Math.random().toString(36).substring(2, 6);
+    const p2 = Math.random().toString(36).substring(2, 6);
+    uuid = `whcs-${p1}-${p2}-${Date.now().toString(36)}`;
     localStorage.setItem('whcs_uuid', uuid);
   }
 
-  // 2. Force a server-validated Username input
-  while (!name) {
-    let inputName = prompt("A nickname is required for the leaderboard. Enter your name:");
+  // If a name is already saved, we're done
+  const savedName = localStorage.getItem('whcs_user_name');
+  if (savedName) return { uuid, name: savedName };
 
-    if (inputName === null) {
-      alert("You cannot submit flags without a leaderboard identity. Please enter a name.");
-      continue; 
-    }
+  // ── Prompt once (no loop) ──────────────────────────────
+  const inputName = prompt(
+    'Enter a nickname to appear on the leaderboard.\n' +
+    '(Required to submit flags — press Cancel to browse without submitting.)'
+  );
 
-    inputName = inputName.trim();
+  // User pressed Cancel or closed the dialog
+  if (inputName === null) return { uuid, name: null };
 
-    if (inputName === "") {
-      alert("Your name cannot be blank!");
-      continue; 
-    }
+  const trimmed = inputName.trim();
 
-    // Ping the hidden Google Apps Script backend to see if the name is allowed
-    try {
-      // LEADERBOARD_API_URL is the global variable pointing to your script execution URL
-      const response = await fetch(`${LEADERBOARD_API_URL}?checkName=${encodeURIComponent(inputName)}`);
-      const result = await response.json();
+  // User submitted a blank string
+  if (trimmed === '') return { uuid, name: null };
 
-      if (!result.valid) {
-        alert("That name contains restricted or inappropriate language. Please choose another.");
-        continue; // Banned word detected! Restart loop.
+  // ── Server-side profanity check (fail open on any error) ─
+  try {
+    const res = await fetch(
+      `${LEADERBOARD_API_URL}?checkName=${encodeURIComponent(trimmed)}`
+    );
+    if (res.ok) {
+      const result = await res.json();
+      if (result.valid== false) {
+        // Genuinely rejected by the server — tell user, but still
+        // return null so the submit handler can show its own message.
+        alert('That name contains restricted language. Please choose a different nickname.');
+        return { uuid, name: null };
       }
-    } catch (err) {
-      console.error("Name verification failed:", err);
-      alert("Connection error validating name. Please try again.");
-      continue;
+    } else {
+      // Non-200 from Apps Script — fail open, log for debugging
+      console.warn(`Name check returned HTTP ${res.status} — proceeding anyway.`);
     }
-
-    // If it passes the server-side validation check
-    name = inputName;
-    localStorage.setItem('whcs_user_name', name);
+  } catch (err) {
+    // Network failure, CORS redirect issue, etc. — fail open
+    console.warn('Name validation unreachable — proceeding without server check:', err);
   }
 
-  return { uuid, name };
+  // Save and return the validated (or fail-open) name
+  localStorage.setItem('whcs_user_name', trimmed);
+  return { uuid, name: trimmed };
 }
 
 /* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
    ════════════════════════════════════════════════════════ */
 async function init() {
-  // 1. Fire up the security handshake first
   const token = await initSessionToken();
 
   if (!token) {
     document.getElementById('loadState').textContent =
-      `⚠ Security Handshake Failed. Please refresh or check CORS settings.`;
+      '⚠ Security Handshake Failed. Please refresh or check CORS settings.';
     return;
   }
   
-  // 2. Fetch the challenges payload
   let rawData;
   try {
     const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges", {
@@ -361,7 +373,6 @@ async function init() {
     return;
   }
 
-  // Loop through and assign everything as before
   for (const cat of Object.keys(rawData)) {
     challenges[cat] = [];
     for (const src of rawData[cat]) {
@@ -372,7 +383,7 @@ async function init() {
         description:  src.description,
         path:         src.path || null,
         image:        src.image || null,
-        answerHashes: src.answerHashes || [], 
+        answerHashes: src.answerHashes || [],
         solved:       false,
         solvedAt:     null,
       });
@@ -387,7 +398,7 @@ async function init() {
 }
 
 /* ════════════════════════════════════════════════════════
-   FILTER BAR — collect all unique tags across every challenge
+   FILTER BAR
    ════════════════════════════════════════════════════════ */
 function buildFilterBar() {
   const allTags = new Set();
@@ -413,7 +424,6 @@ function toggleFilter(tag) {
   } else {
     activeTags.add(tag);
   }
-  /* update button states */
   document.querySelectorAll('.ftag').forEach(btn => {
     btn.classList.toggle('active', activeTags.has(btn.dataset.tag));
   });
@@ -429,8 +439,6 @@ document.getElementById('filterClear').addEventListener('click', () => {
   applyFilter();
 });
 
-/* Show/hide cards and whole sections based on active tags.
-   A card matches if it has ALL active tags (AND logic). */
 function applyFilter() {
   const main = document.getElementById('boardMain');
   let anyVisible = false;
@@ -447,7 +455,6 @@ function applyFilter() {
     sec.classList.toggle('hidden', !sectionHasVisible);
   });
 
-  /* global no-results notice */
   let notice = document.getElementById('noResults');
   if (!notice) {
     notice = document.createElement('p');
@@ -464,7 +471,6 @@ function applyFilter() {
    ════════════════════════════════════════════════════════ */
 function renderBoard() {
   const main = document.getElementById('boardMain');
-  /* remove category sections but keep the load-state / no-results nodes */
   main.querySelectorAll('.cat-section').forEach(n => n.remove());
 
   Object.keys(challenges).forEach(cat => {
@@ -484,7 +490,7 @@ function renderBoard() {
     challenges[cat].forEach(ch => {
       const card = document.createElement('div');
       card.className    = 'card' + (ch.solved ? ' solved' : '');
-      card.dataset.tags = JSON.stringify(ch.tags); // used by applyFilter
+      card.dataset.tags = JSON.stringify(ch.tags);
       card.innerHTML = `
         <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5">
           <polyline points="20 6 9 17 4 12"/>
@@ -499,7 +505,6 @@ function renderBoard() {
     main.insertBefore(sec, main.querySelector('#noResults'));
   });
 
-  /* re-apply any active filters after a re-render */
   if (activeTags.size > 0) applyFilter();
 }
 
@@ -534,14 +539,10 @@ function openPlay(ch, cat) {
       </div>
     `;
   } else if (ch.path) {
-    const fileName = ch.path.split('/').pop(); 
-
+    const fileName = ch.path.split('/').pop();
     descEl.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:1rem;">
-        <div style="text-align:center;">
-          ${ch.description}
-        </div>
-
+        <div style="text-align:center;">${ch.description}</div>
         <a href="${ch.path}" target="_blank"
           style="display:inline-flex; justify-content:center; align-items:center; gap:.4rem; color:var(--accent); font-weight:600; background:var(--accent-l); border:1px solid var(--solved-b); border-radius:8px; padding:.5rem 1rem; text-decoration:none; transition:background .15s;">
           <span style="transform: translateX(-20px); display:inline-block;">
@@ -595,14 +596,18 @@ document.getElementById('alreadyBtn').addEventListener('click', () => {
 
 /* ════════════════════════════════════════════════════════
    SUBMIT
-   ════════════════════════════════════════════════════════ */document.getElementById('subBtn').addEventListener('click', async () => {
+   ────────────────────────────────────────────────────────
+   FIX 3: After getOrCreateUser() returns, check whether
+   name is null (user cancelled or skipped). If so, show
+   a friendly inline error and return — never loop.
+   ════════════════════════════════════════════════════════ */
+document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
-  
+
   const fb  = document.getElementById('fb');
   const inp = document.getElementById('ansInput');
   const raw = inp.value.trim();
 
-  // 1. Basic validation
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
 
   const { ch } = activePlay;
@@ -612,52 +617,55 @@ document.getElementById('alreadyBtn').addEventListener('click', () => {
     return;
   }
 
-  // 2. Identify the user (pauses for prompt if name is missing)
-  const { uuid, name } = await getOrCreateUser(); 
+  // Ask for a name if we don't have one yet — but never loop
+  const { uuid, name } = await getOrCreateUser();
 
-  // 3. Calculate hash and check correctness ONCE
+  if (!name) {
+    // User cancelled or left blank — stop here, don't submit
+    fb.textContent = 'A leaderboard nickname is required to submit. Click Submit again to enter one.';
+    fb.className   = 'fb bad';
+    return;
+  }
+
+  // Check the answer hash
   const h = await sha256(raw);
   const isCorrect = ch.answerHashes.includes(h);
 
-  // 4. LOG TO GOOGLE SHEETS
+  // Log to Google Sheets
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn9Tjy4rSbMeTGMoGYHfpl-X4dPMvgaRrlujmq9tr9jsrL331G9d3RxMafiRY2b7jgQQ/exec";
-  
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      uuid: uuid,
-      name: name,
+      uuid,
+      name,
       challengeName: ch.name,
       response: raw,
-      points: isCorrect ? ch.points : 0, 
+      points: isCorrect ? ch.points : 0,
       timestamp: new Date().toLocaleString()
     })
   }).catch(err => console.error("Logging failed:", err));
 
-  // 5. Handle the result UI
   if (isCorrect) {
     const now   = new Date().toISOString();
     ch.solved   = true;
     ch.solvedAt = now;
     score      += ch.points;
 
-    // Update UI Score
     const el = document.getElementById('totalScore');
     el.textContent = score;
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 400);
-    
-    saveProgress(); // Persist to localStorage
 
-    // Switch Modal View
+    saveProgress();
+
     document.getElementById('ansSection').style.display    = 'none';
     document.getElementById('solvedSection').style.display = 'block';
     document.getElementById('solvedTs').textContent        = formatTs(now);
     document.getElementById('fbAlready').textContent       = '';
 
-    renderBoard(); // Refresh the grid
+    renderBoard();
     showToast(`+${ch.points} pts — "${ch.name}" solved`);
     setTimeout(closePlay, 2200);
   } else {
@@ -702,9 +710,7 @@ init();
    LEADERBOARD GRAPH & VIEW NAVIGATION
    ════════════════════════════════════════════════════════ */
 let leaderboardChartInstance = null;
-const LEADERBOARD_API_URL = "https://script.google.com/macros/s/AKfycbw7ToUyfnMh8WbNZ_L6XTiEEsKM8jE24qUUCOOpgletJtSXHFhuz500OWKsGRAOi30qDA/exec";
 
-// 1. Toggle Page Views
 document.getElementById('navLeaderboard').addEventListener('click', () => {
   document.getElementById('boardMain').style.display = 'none';
   document.getElementById('filterBar').style.display = 'none';
@@ -720,7 +726,6 @@ document.getElementById('navHome').addEventListener('click', () => {
   document.getElementById('navLeaderboard').style.color = 'var(--text-2)';
 });
 
-// 2. Fetch and Draw Chart
 async function renderLeaderboard() {
   const canvas = document.getElementById('leaderboardChart');
   if (!canvas) return;
@@ -738,7 +743,7 @@ async function renderLeaderboard() {
 
     const datasets = topPlayers.map((player, index) => ({
       label: player.name,
-      data: player.data, 
+      data: player.data,
       borderColor: colors[index % colors.length],
       backgroundColor: colors[index % colors.length],
       tension: 0.3,
@@ -746,7 +751,6 @@ async function renderLeaderboard() {
       fill: false
     }));
 
-    // Destroy prior chart container tracking if switching pages rapidly
     if (leaderboardChartInstance) {
       leaderboardChartInstance.destroy();
     }
