@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WHCS Challenge Board</title>
@@ -20,7 +22,7 @@
     --sh-lg:0 20px 60px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
     --r:10px;--rs:6px;
   }
-  html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x: hidden}
+  html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text3);line-height:1.5;overflow-x: hidden}
 
   /* ── HEADER ── */
   header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh-sm)}
@@ -124,7 +126,8 @@
     <div class="logo">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
     </div>
-    <span class="site-title">WHCS Challenge Board</span>
+    <span class="site-title" style="cursor:pointer;" id="navHome">WHCS Challenge Board</span>
+    <span id="navLeaderboard" style="margin-left: 20px; font-size: 0.9rem; font-weight: 500; color: var(--text-2); cursor: pointer; transition: color 0.2s;">Leaderboard</span>
   </div>
   <div class="h-right">
     <div class="score-pill">
@@ -139,6 +142,20 @@
   <span class="filter-label">Filter by tag</span>
   <div class="filter-tags" id="filterTags"></div>
   <button class="filter-clear" id="filterClear">Clear filters</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboardPage" style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto;">
+  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+     <h2 class="cat-name" style="color:#000;">Global Leaderboard</h2>
+     <div class="cat-line"></div>
+  </div>
+  
+  <div style="background: #fff; border: 1px solid var(--border); border-radius: var(--r); padding: 2rem; box-shadow: var(--sh-md);">
+    <div style="height: 500px; position: relative;">
+      <canvas id="leaderboardChart"></canvas>
+    </div>
+  </div>
 </div>
 
 <!-- BOARD -->
@@ -198,7 +215,9 @@ async function sha256(str) {
 const challenges = {};   // { category: [challenge, …] }
 let score       = 0;
 let activePlay  = null;
-let activeTags  = new Set();   // currently selected filter tags
+let activeTags  = new Set();
+
+const LEADERBOARD_API_URL = "https://script.google.com/macros/s/AKfycbw7ToUyfnMh8WbNZ_L6XTiEEsKM8jE24qUUCOOpgletJtSXHFhuz500OWKsGRAOi30qDA/exec";
 
 /* ════════════════════════════════════════════════════════
    LOCALSTORAGE
@@ -250,7 +269,7 @@ async function initSessionToken() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     sessionStorage.setItem('whcs_token', data.token);
-    return data.token; // ← this line was missing
+    return data.token;
   } catch (err) {
     console.error("Security handshake failed:", err);
     return null;
@@ -258,19 +277,85 @@ async function initSessionToken() {
 }
 
 /* ════════════════════════════════════════════════════════
+   GET OR CREATE USER
+   ────────────────────────────────────────────────────────
+   FIX 1: No infinite loop. If the user cancels or leaves
+   the name blank, we return { uuid, name: null } immediately.
+   The submit handler is responsible for showing a friendly
+   error and stopping — it will NOT call this again in a loop.
+
+   FIX 2: The name-validation fetch is wrapped in a try/catch
+   that FAILS OPEN. If the Google Apps Script endpoint is
+   unreachable (CORS redirect, network error, etc.) the name
+   is accepted anyway rather than trapping the user forever.
+   ════════════════════════════════════════════════════════ */
+async function getOrCreateUser() {
+  // Ensure a stable UUID exists
+  let uuid = localStorage.getItem('whcs_uuid');
+  if (!uuid) {
+    const p1 = Math.random().toString(36).substring(2, 6);
+    const p2 = Math.random().toString(36).substring(2, 6);
+    uuid = `whcs-${p1}-${p2}-${Date.now().toString(36)}`;
+    localStorage.setItem('whcs_uuid', uuid);
+  }
+
+  // If a name is already saved, we're done
+  const savedName = localStorage.getItem('whcs_user_name');
+  if (savedName) return { uuid, name: savedName };
+
+  // ── Prompt once (no loop) ──────────────────────────────
+  const inputName = prompt(
+    'Enter a nickname to appear on the leaderboard.\n' +
+    '(Required to submit flags — press Cancel to browse without submitting.)'
+  );
+
+  // User pressed Cancel or closed the dialog
+  if (inputName === null) return { uuid, name: null };
+
+  const trimmed = inputName.trim();
+
+  // User submitted a blank string
+  if (trimmed === '') return { uuid, name: null };
+
+  // ── Server-side profanity check (fail open on any error) ─
+  try {
+    const res = await fetch(
+      `https://whcsctf-api-bdu8.onrender.com/api/checkname?name=${encodeURIComponent(trimmed)}`
+    );
+    if (res.ok) {
+      const result = await res.json();
+      if (result.valid === false) {
+        // Genuinely rejected by the server — tell user, but still
+        // return null so the submit handler can show its own message.
+        alert('That name contains restricted language. Please choose a different nickname.');
+        return { uuid, name: null };
+      }
+    } else {
+      // Non-200 from Apps Script — fail open, log for debugging
+      console.warn(`Name check returned HTTP ${res.status} — proceeding anyway.`);
+    }
+  } catch (err) {
+    // Network failure, CORS redirect issue, etc. — fail open
+    console.warn('Name validation unreachable — proceeding without server check:', err);
+  }
+
+  // Save and return the validated (or fail-open) name
+  localStorage.setItem('whcs_user_name', trimmed);
+  return { uuid, name: trimmed };
+}
+
+/* ════════════════════════════════════════════════════════
    LOAD challenges.json, hash answers, restore saves
    ════════════════════════════════════════════════════════ */
 async function init() {
-  // 1. Fire up the security handshake first
   const token = await initSessionToken();
 
   if (!token) {
     document.getElementById('loadState').textContent =
-      `⚠ Security Handshake Failed. Please refresh or check CORS settings.`;
+      '⚠ Security Handshake Failed. Please refresh or check CORS settings.';
     return;
   }
   
-  // 2. Fetch the challenges payload
   let rawData;
   try {
     const res = await fetch("https://whcsctf-api-bdu8.onrender.com/api/challenges", {
@@ -288,18 +373,17 @@ async function init() {
     return;
   }
 
-  // Loop through and assign everything as before
   for (const cat of Object.keys(rawData)) {
     challenges[cat] = [];
     for (const src of rawData[cat]) {
       challenges[cat].push({
         name:         src.name,
         points:       src.points,
-        tags:         Array.isArray(src.tags) ? src.tags.slice(0, 5) : [],
+        tags:         Array.isArray(src.tags) ? src.tags.slice(0, 6) : [],
         description:  src.description,
         path:         src.path || null,
         image:        src.image || null,
-        answerHashes: src.answerHashes || [], 
+        answerHashes: src.answerHashes || [],
         solved:       false,
         solvedAt:     null,
       });
@@ -314,7 +398,7 @@ async function init() {
 }
 
 /* ════════════════════════════════════════════════════════
-   FILTER BAR — collect all unique tags across every challenge
+   FILTER BAR
    ════════════════════════════════════════════════════════ */
 function buildFilterBar() {
   const allTags = new Set();
@@ -340,7 +424,6 @@ function toggleFilter(tag) {
   } else {
     activeTags.add(tag);
   }
-  /* update button states */
   document.querySelectorAll('.ftag').forEach(btn => {
     btn.classList.toggle('active', activeTags.has(btn.dataset.tag));
   });
@@ -356,8 +439,6 @@ document.getElementById('filterClear').addEventListener('click', () => {
   applyFilter();
 });
 
-/* Show/hide cards and whole sections based on active tags.
-   A card matches if it has ALL active tags (AND logic). */
 function applyFilter() {
   const main = document.getElementById('boardMain');
   let anyVisible = false;
@@ -374,7 +455,6 @@ function applyFilter() {
     sec.classList.toggle('hidden', !sectionHasVisible);
   });
 
-  /* global no-results notice */
   let notice = document.getElementById('noResults');
   if (!notice) {
     notice = document.createElement('p');
@@ -391,7 +471,6 @@ function applyFilter() {
    ════════════════════════════════════════════════════════ */
 function renderBoard() {
   const main = document.getElementById('boardMain');
-  /* remove category sections but keep the load-state / no-results nodes */
   main.querySelectorAll('.cat-section').forEach(n => n.remove());
 
   Object.keys(challenges).forEach(cat => {
@@ -411,7 +490,7 @@ function renderBoard() {
     challenges[cat].forEach(ch => {
       const card = document.createElement('div');
       card.className    = 'card' + (ch.solved ? ' solved' : '');
-      card.dataset.tags = JSON.stringify(ch.tags); // used by applyFilter
+      card.dataset.tags = JSON.stringify(ch.tags);
       card.innerHTML = `
         <svg class="solved-icon" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2.5">
           <polyline points="20 6 9 17 4 12"/>
@@ -426,7 +505,6 @@ function renderBoard() {
     main.insertBefore(sec, main.querySelector('#noResults'));
   });
 
-  /* re-apply any active filters after a re-render */
   if (activeTags.size > 0) applyFilter();
 }
 
@@ -461,14 +539,10 @@ function openPlay(ch, cat) {
       </div>
     `;
   } else if (ch.path) {
-    const fileName = ch.path.split('/').pop(); 
-
+    const fileName = ch.path.split('/').pop();
     descEl.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:1rem;">
-        <div style="text-align:center;">
-          ${ch.description}
-        </div>
-
+        <div style="text-align:center;">${ch.description}</div>
         <a href="${ch.path}" target="_blank"
           style="display:inline-flex; justify-content:center; align-items:center; gap:.4rem; color:var(--accent); font-weight:600; background:var(--accent-l); border:1px solid var(--solved-b); border-radius:8px; padding:.5rem 1rem; text-decoration:none; transition:background .15s;">
           <span style="transform: translateX(-20px); display:inline-block;">
@@ -522,23 +596,58 @@ document.getElementById('alreadyBtn').addEventListener('click', () => {
 
 /* ════════════════════════════════════════════════════════
    SUBMIT
+   ────────────────────────────────────────────────────────
+   FIX 3: After getOrCreateUser() returns, check whether
+   name is null (user cancelled or skipped). If so, show
+   a friendly inline error and return — never loop.
    ════════════════════════════════════════════════════════ */
 document.getElementById('subBtn').addEventListener('click', async () => {
   if (!activePlay || activePlay.ch.solved) return;
-  const { ch } = activePlay;
-  const raw = document.getElementById('ansInput').value.trim();
+
   const fb  = document.getElementById('fb');
   const inp = document.getElementById('ansInput');
+  const raw = inp.value.trim();
 
   if (!raw) { errShake(inp, fb, 'Please enter an answer.'); return; }
+
+  const { ch } = activePlay;
   if (!ch.answerHashes?.length) {
     fb.textContent = 'No answer set for this challenge yet.';
     fb.className   = 'fb bad';
     return;
   }
 
+  // Ask for a name if we don't have one yet — but never loop
+  const { uuid, name } = await getOrCreateUser();
+
+  if (!name) {
+    // User cancelled or left blank — stop here, don't submit
+    fb.textContent = 'A leaderboard nickname is required to submit. Click Submit again to enter one.';
+    fb.className   = 'fb bad';
+    return;
+  }
+
+  // Check the answer hash
   const h = await sha256(raw);
-  if (ch.answerHashes.includes(h)) {
+  const isCorrect = ch.answerHashes.includes(h);
+
+  // Log to Google Sheets
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFSo82qWNphxzzC-hXDVRf30kXCYAa-wSOGZksZPsNLXDmv2V79uC7mepTI1hb6D9Z8w/exec";
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      uuid,
+      name,
+      challengeName: ch.name,
+      response: raw,
+      points: isCorrect ? ch.points : 0,
+      timestamp: new Date().toLocaleString()
+    })
+  }).catch(err => console.error("Logging failed:", err));
+
+  if (isCorrect) {
     const now   = new Date().toISOString();
     ch.solved   = true;
     ch.solvedAt = now;
@@ -548,6 +657,7 @@ document.getElementById('subBtn').addEventListener('click', async () => {
     el.textContent = score;
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 400);
+
     saveProgress();
 
     document.getElementById('ansSection').style.display    = 'none';
@@ -595,6 +705,85 @@ function showToast(msg) {
 }
 
 init();
+
+/* ════════════════════════════════════════════════════════
+   LEADERBOARD GRAPH & VIEW NAVIGATION
+   ════════════════════════════════════════════════════════ */
+let leaderboardChartInstance = null;
+
+document.getElementById('navLeaderboard').addEventListener('click', () => {
+  document.getElementById('boardMain').style.display = 'none';
+  document.getElementById('filterBar').style.display = 'none';
+  document.getElementById('leaderboardPage').style.display = 'block';
+  document.getElementById('navLeaderboard').style.color = 'var(--accent)';
+  renderLeaderboard();
+});
+
+document.getElementById('navHome').addEventListener('click', () => {
+  document.getElementById('boardMain').style.display = 'block';
+  document.getElementById('filterBar').style.display = 'flex';
+  document.getElementById('leaderboardPage').style.display = 'none';
+  document.getElementById('navLeaderboard').style.color = 'var(--text-2)';
+});
+
+async function renderLeaderboard() {
+  const canvas = document.getElementById('leaderboardChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  try {
+    const response = await fetch(LEADERBOARD_API_URL);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const topPlayers = await response.json();
+
+    const colors = [
+      '#2d6a4f', '#e63946', '#457b9d', '#f1c40f', '#8e44ad', 
+      '#e67e22', '#2ecc71', '#34495e', '#ff006e', '#3a86ff'
+    ];
+
+    const datasets = topPlayers.map((player, index) => ({
+      label: player.name,
+      data: player.data,
+      borderColor: colors[index % colors.length],
+      backgroundColor: colors[index % colors.length],
+      tension: 0.3,
+      pointRadius: 4,
+      fill: false
+    }));
+
+    if (leaderboardChartInstance) {
+      leaderboardChartInstance.destroy();
+    }
+
+    leaderboardChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: { 
+              unit: 'day',
+              displayFormats: { day: 'MMM d' }
+            },
+            title: { display: true, text: 'Timeline Event' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Total Points' }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Leaderboard load failed:", err);
+  }
+}
 </script>
 </body>
 </html>
