@@ -320,11 +320,11 @@ async function getOrCreateUser() {
   // ── Server-side profanity check (fail open on any error) ─
   try {
     const res = await fetch(
-      `${LEADERBOARD_API_URL}?checkName=${encodeURIComponent(trimmed)}`
+      `https://whcsctf-api-bdu8.onrender.com/api/checkname?name=${encodeURIComponent(trimmed)}`
     );
     if (res.ok) {
       const result = await res.json();
-      if (result.valid== false) {
+      if (result.valid === false) {
         // Genuinely rejected by the server — tell user, but still
         // return null so the submit handler can show its own message.
         alert('That name contains restricted language. Please choose a different nickname.');
