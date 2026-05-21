@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grand Line TCG – One Piece Card Game Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:    #0a0e1a;
+      --deep:    #0f1525;
+      --panel:   #141b2d;
+      --border:  #1e2d4a;
+      --gold:    #d4a017;
+      --gold2:   #f0c040;
+      --red:     #c0392b;
+      --red2:    #e74c3c;
+      --teal:    #1abc9c;
+      --muted:   #6b7fa3;
+      --text:    #dce6f5;
+      --light:   #eaf0fc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── BACKGROUND PATTERN ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212,160,23,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(26,188,156,.05) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e2d4a' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,14,26,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .nav-logo {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 1.15rem;
+      color: var(--gold);
+      text-decoration: none;
+      padding: 18px 0;
+      margin-right: auto;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .nav-logo span { color: var(--red2); }
+
+    nav a {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 22px 14px;
+      display: inline-block;
+      transition: color .2s;
+      cursor: pointer;
+    }
+    nav a:hover, nav a.active { color: var(--gold2); }
+    nav a.active { border-bottom: 2px solid var(--gold); }
+
+    /* ── PAGES ── */
+    .page { display: none; position: relative; z-index: 1; }
+    .page.active { display: block; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      line-height: 1.1;
+      color: var(--gold);
+      text-shadow: 0 0 60px rgba(212,160,23,.35), 0 4px 20px rgba(0,0,0,.8);
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: var(--red2); }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      font-style: italic;
+    }
+
+    .btn {
+      display: inline-block;
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 14px 36px;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .25s;
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--navy);
+      border: 2px solid var(--gold);
+    }
+    .btn-gold:hover { background: var(--gold2); border-color: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,160,23,.3); }
+    .btn-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      margin-left: 12px;
+    }
+    .btn-outline:hover { background: rgba(212,160,23,.1); transform: translateY(-2px); }
+
+    .hero-divider {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 48px auto 0;
+    }
+
+    /* ── SECTION WRAPPER ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    .section-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 1.9rem;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    hr.fancy {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 60px 0;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .tcg-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .tcg-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 20px rgba(212,160,23,.1); }
+
+    .tcg-card-img {
+      width: 100%;
+      aspect-ratio: 2/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tcg-card-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(255,255,255,.06) 0%, transparent 60%);
+    }
+
+    .tcg-card-body { padding: 14px 16px 18px; }
+
+    .tcg-card-name {
+      font-family: 'Cinzel', serif;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--light);
+      margin-bottom: 4px;
+    }
+
+    .tcg-card-type {
+      font-size: .78rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tcg-card-desc { font-size: .88rem; color: var(--text); opacity: .85; }
+
+    .badge {
+      display: inline-block;
+      font-size: .68rem;
+      font-family: 'Cinzel', serif;
+      letter-spacing: .08em;
+      padding: 3px 9px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .badge-red    { background: rgba(192,57,43,.25); color: var(--red2); border: 1px solid var(--red); }
+    .badge-gold   { background: rgba(212,160,23,.2); color: var(--gold2); border: 1px solid var(--gold); }
+    .badge-teal   { background: rgba(26,188,156,.15); color: var(--teal); border: 1px solid var(--teal); }
+    .badge-purple { background: rgba(155,89,182,.2); color: #c39bd3; border: 1px solid #8e44ad; }
+
+    /* ── TABLE ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+    }
+    .data-table th {
+      font-family: 'Cinzel', serif;
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(30,45,74,.5);
+      vertical-align: top;
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,.025); }
+
+    /* ── RANKINGS ── */
+    .rank-row { display: flex; align-items: center; gap: 18px; padding: 16px 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; transition: transform .2s; }
+    .rank-row:hover { transform: translateX(4px); }
+    .rank-num { font-family: 'Cinzel Decorative', cursive; font-size: 1.4rem; color: var(--muted); width: 40px; text-align: center; flex-shrink: 0; }
+    .rank-num.gold  { color: #FFD700; }
+    .rank-num.silver{ color: #C0C0C0; }
+    .rank-num.bronze{ color: #CD7F32; }
+    .rank-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+    .rank-info { flex: 1; }
+    .rank-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; color: var(--light); }
+    .rank-country { font-size: .82rem; color: var(--muted); }
+    .rank-score { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--gold2); white-space: nowrap; }
+
+    /* ── LOCATIONS ── */
+    .loc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .loc-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 22px 24px; }
+    .loc-card h3 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--light); margin-bottom: 6px; }
+    .loc-card .loc-city { font-size: .82rem; color: var(--teal); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+    .loc-card p { font-size: .9rem; color: var(--text); opacity: .8; }
+
+    /* ── EVENTS ── */
+    .event-list .event-item { display: grid; grid-template-columns: 80px 1fr auto; gap: 20px; align-items: start; padding: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 14px; }
+    .event-date { text-align: center; }
+    .event-date .day { font-family: 'Cinzel Decorative', cursive; font-size: 1.6rem; color: var(--gold); line-height: 1; }
+    .event-date .mon { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .event-title { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--light); margin-bottom: 5px; }
+    .event-loc { font-size: .85rem; color: var(--muted); }
+    .event-prize { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--gold2); text-align: right; }
+
+    /* ── HOW TO PLAY ── */
+    .htp-steps { counter-reset: step; }
+    .htp-step { display: flex; gap: 24px; margin-bottom: 36px; }
+    .htp-step-num { font-family: 'Cinzel Decorative', cursive; font-size: 2rem; color: var(--gold); opacity: .4; flex-shrink: 0; width: 50px; }
+    .htp-step-body h3 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--light); margin-bottom: 6px; }
+    .htp-step-body p { font-size: .95rem; color: var(--text); opacity: .85; }
+
+    /* ── META ── */
+    .meta-tier { margin-bottom: 40px; }
+    .meta-tier-label { font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .15em; text-transform: uppercase; padding: 6px 16px; border-radius: 2px; display: inline-block; margin-bottom: 16px; }
+    .tier-s { background: rgba(192,57,43,.3); color: #ff6b6b; border: 1px solid var(--red); }
+    .tier-a { background: rgba(212,160,23,.2); color: var(--gold2); border: 1px solid var(--gold); }
+    .tier-b { background: rgba(26,188,156,.15); color: var(--teal); border: 1px solid var(--teal); }
+    .tier-c { background: rgba(107,127,163,.2); color: var(--muted); border: 1px solid var(--muted); }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .meta-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+    .meta-card h4 { font-family: 'Cinzel', serif; font-size: .9rem; color: var(--light); margin-bottom: 4px; }
+    .meta-card p { font-size: .82rem; color: var(--muted); }
+
+    /* ── ODA PAGE ── */
+    .oda-hero { display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: start; margin-bottom: 50px; }
+    .oda-portrait { width: 200px; aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 6rem; background: var(--panel); border: 2px solid var(--gold); flex-shrink: 0; }
+    .oda-bio h2 { font-family: 'Cinzel Decorative', cursive; font-size: 1.6rem; color: var(--gold); margin-bottom: 6px; }
+    .oda-bio .oda-jp { font-size: 1.1rem; color: var(--muted); font-style: italic; margin-bottom: 14px; }
+    .oda-stats { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 16px; }
+    .oda-stat { text-align: center; }
+    .oda-stat .val { font-family: 'Cinzel Decorative', cursive; font-size: 1.4rem; color: var(--gold2); }
+    .oda-stat .lbl { font-size: .75rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--gold), transparent); }
+    .timeline-item { position: relative; margin-bottom: 28px; }
+    .timeline-item::before { content: ''; position: absolute; left: -33px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+    .timeline-year { font-family: 'Cinzel', serif; font-size: .8rem; color: var(--gold); letter-spacing: .08em; }
+    .timeline-text { font-size: .95rem; color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    footer .footer-logo {
+      font-family: 'Cinzel Decorative', cursive;
+      color: var(--gold);
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    /* ── STAT BOXES ── */
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 16px; margin: 36px 0; }
+    .stat-box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px; text-align: center; }
+    .stat-box .big { font-family: 'Cinzel Decorative', cursive; font-size: 2rem; color: var(--gold); }
+    .stat-box .lbl { font-size: .78rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-top: 4px; }
+
+    @media(max-width:700px) {
+      nav a { padding: 18px 8px; font-size: .6rem; }
+      .nav-logo { font-size: .9rem; }
+      .oda-hero { grid-template-columns: 1fr; }
+      .event-list .event-item { grid-template-columns: 60px 1fr; }
+      .event-prize { grid-column: 2; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="nav-logo" onclick="showPage('home')" style="cursor:pointer;">Grand<span>Line</span> TCG</a>
+    <nav>
+      <a onclick="showPage('home')"     id="nav-home"     class="active">Home</a>
+      <a onclick="showPage('cards')"    id="nav-cards">Cards</a>
+      <a onclick="showPage('howtoplay')"id="nav-howtoplay">How to Play</a>
+      <a onclick="showPage('meta')"     id="nav-meta">Meta</a>
+      <a onclick="showPage('events')"   id="nav-events">Events</a>
+      <a onclick="showPage('locations')"id="nav-locations">Locations</a>
+      <a onclick="showPage('rankings')" id="nav-rankings">Rankings</a>
+      <a onclick="showPage('oda')"      id="nav-oda">Eiichiro Oda</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════════════ HOME ═══════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-eyebrow">The Official One Piece Card Game Community Hub</div>
+    <h1>Set Sail on the <span>Grand Line</span></h1>
+    <p class="hero-sub">Build your crew, challenge rivals, and claim the title of King of the Pirates.</p>
+    <div>
+      <a class="btn btn-gold" onclick="showPage('cards')">Explore Cards</a>
+      <a class="btn btn-outline" onclick="showPage('howtoplay')">Learn to Play</a>
+    </div>
+    <div class="hero-divider"></div>
+  </div>
+
+  <div class="section">
+    <div class="stat-row">
+      <div class="stat-box"><div class="big">1,400+</div><div class="lbl">Unique Cards</div></div>
+      <div class="stat-box"><div class="big">22</div><div class="lbl">Set Releases</div></div>
+      <div class="stat-box"><div class="big">180+</div><div class="lbl">Countries</div></div>
+      <div class="stat-box"><div class="big">$4.2M</div><div class="lbl">Prize Pool 2025</div></div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h2 class="section-title">Latest News</h2>
+    <p class="section-sub">Stay up-to-date with the world of One Piece TCG</p>
+
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>Headline</th><th>Category</th></tr></thead>
+      <tbody>
+        <tr><td>May 18, 2026</td><td>Set 14 "Awakening of the New Era" spoilers — Haki Clash mechanic revealed</td><td><span class="badge badge-red">New Set</span></td></tr>
+        <tr><td>May 12, 2026</td><td>Charlotte Katakuri OP-06-L banned from Standard after WCS data</td><td><span class="badge badge-gold">Banned List</span></td></tr>
+        <tr><td>May 03, 2026</td><td>2026 World Championship qualifier schedule announced — 48 regional stops</td><td><span class="badge badge-teal">Competitive</span></td></tr>
+        <tr><td>Apr 27, 2026</td><td>Official app update v4.2: deck-tracker integration now live</td><td><span class="badge badge-purple">App</span></td></tr>
+        <tr><td>Apr 14, 2026</td><td>Bandai reveals Paramount War Secret Rare featuring Whitebeard at full power</td><td><span class="badge badge-red">New Set</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ CARDS ═══════════════════════ -->
+<div id="page-cards" class="page">
+  <div class="section">
+    <h2 class="section-title">Card Database</h2>
+    <p class="section-sub">A curated look at iconic cards across all sets — Leaders, Characters, Events, and Stages.</p>
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold2);margin-bottom:20px;font-size:1.05rem;letter-spacing:.06em;">⭐ Leader Cards</h3>
+    <div class="card-grid">
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#1a2a4a,#0d1f3c);">🏴‍☠️</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-red">Leader</span>
+          <div class="tcg-card-name">Monkey D. Luffy</div>
+          <div class="tcg-card-type">OP-01 · ST-01-001 · Red</div>
+          <div class="tcg-card-desc">Power 5000. <em>Activate: Main</em> — Give up to 1 of your Characters +1000 Power until end of turn. <em>"I'm gonna be King of the Pirates!"</em></div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#1a2e1a,#0d220d);">⚔️</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-teal">Leader</span>
+          <div class="tcg-card-name">Roronoa Zoro</div>
+          <div class="tcg-card-type">OP-02 · OP02-001 · Green</div>
+          <div class="tcg-card-desc">Power 5000. <em>When Attacking</em> — If you have 3 or more Characters with [Slash], this Leader gains +2000 Power for this battle.</div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#2e1a1a,#3d0d0d);">🔥</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-red">Leader</span>
+          <div class="tcg-card-name">Portgas D. Ace</div>
+          <div class="tcg-card-type">OP-04 · OP04-003 · Red</div>
+          <div class="tcg-card-desc">Power 5000. <em>DON!! ×1</em> — Add up to 1 [Whitebeard Pirates] card from your trash to hand. <em>[Flame Fist]</em></div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#1e1a2e,#12063d);">🌊</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-purple">Leader</span>
+          <div class="tcg-card-name">Boa Hancock</div>
+          <div class="tcg-card-type">OP-06 · OP06-002 · Purple</div>
+          <div class="tcg-card-desc">Power 5000. <em>Main</em> — You may rest 2 DON!! to give target opponent's Character −3000 Power until end of turn.</div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#2a1a0d,#3d1e00);">⚡</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-gold">Leader</span>
+          <div class="tcg-card-name">Gol D. Roger</div>
+          <div class="tcg-card-type">OP-09 · OP09-001 · Yellow</div>
+          <div class="tcg-card-desc">Power 6000. <em>On Play</em> — Look at the top 5 cards of your deck; place up to 2 into hand, rest to bottom. <em>[Conqueror's Haki]</em></div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#1a2a2e,#0d2230);">🩺</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-teal">Leader</span>
+          <div class="tcg-card-name">Trafalgar Law</div>
+          <div class="tcg-card-type">OP-03 · OP03-005 · Green</div>
+          <div class="tcg-card-desc">Power 5000. <em>Activate: Main</em> — DON!! ×2: Swap any 1 of your Characters with target opponent's Character. <em>[Ope Ope no Mi]</em></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold2);margin-bottom:20px;font-size:1.05rem;letter-spacing:.06em;">🃏 Notable Character Cards</h3>
+    <div class="card-grid">
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#2a1f0a,#3d2a00);">👊</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-gold">Character</span>
+          <div class="tcg-card-name">Edward Newgate "Whitebeard"</div>
+          <div class="tcg-card-type">OP-04 · OP04-020 · Yellow · 10 Cost</div>
+          <div class="tcg-card-desc">Power 12000. Blocker. <em>On K.O.</em> — Your Leader gains [Rush] until end of opponent's next turn. <em>The Strongest Man in the World.</em></div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#1a0d2a,#2d0050);">🌌</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-purple">Character</span>
+          <div class="tcg-card-name">Marshall D. Teach</div>
+          <div class="tcg-card-type">OP-07 · OP07-102 · Purple · 8 Cost</div>
+          <div class="tcg-card-desc">Power 9000. <em>On Play</em> — Negate the effect of up to 1 of opponent's Characters. <em>[Yami Yami + Gura Gura no Mi]</em></div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#0d1a0d,#003d00);">🗺️</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-teal">Character</span>
+          <div class="tcg-card-name">Nami</div>
+          <div class="tcg-card-type">OP-01 · OP01-016 · Green · 2 Cost</div>
+          <div class="tcg-card-desc">Power 2000. <em>On Play</em> — Draw 1 card, then place 1 card from hand at bottom of deck. Your navigator keeps the crew safe.</div>
+        </div>
+      </div>
+
+      <div class="tcg-card">
+        <div class="tcg-card-img" style="background:linear-gradient(135deg,#2a0d0d,#4a0000);">🔴</div>
+        <div class="tcg-card-body">
+          <span class="badge badge-red">Character</span>
+          <div class="tcg-card-name">Shanks</div>
+          <div class="tcg-card-type">OP-09 · OP09-119 · Red · 9 Cost</div>
+          <div class="tcg-card-desc">Power 10000. [Rush]. <em>Trigger</em> — Give target opponent's Leader or Character −4000 Power. <em>[Conqueror's Haki — Full Burst]</em></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold2);margin-bottom:20px;font-size:1.05rem;letter-spacing:.06em;">🌀 Event & Stage Cards</h3>
+    <table class="data-table">
+      <thead><tr><th>Card Name</th><th>Set</th><th>Type</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Gum-Gum Elephant Gun</strong></td><td>OP-01</td><td><span class="badge badge-red">Event</span></td><td>Give target Character −6000 Power this battle. <em>Counter +2000.</em></td></tr>
+        <tr><td><strong>Santoryu: Oni Giri</strong></td><td>OP-02</td><td><span class="badge badge-teal">Event</span></td><td>K.O. 1 of your opponent's Characters with 5000 or less Power. Add 1 [Slash] card from trash to hand.</td></tr>
+        <tr><td><strong>Marineford</strong></td><td>OP-04</td><td><span class="badge badge-gold">Stage</span></td><td>Your [Marine] Characters gain +1000 Power. Opponent's Characters cannot use [Rush] while this Stage is active.</td></tr>
+        <tr><td><strong>Ope Ope: ROOM</strong></td><td>OP-03</td><td><span class="badge badge-teal">Event</span></td><td>DON!! ×3 — Swap 2 of your Characters with 2 of opponent's Characters (Power 5000 or less each).</td></tr>
+        <tr><td><strong>Thousand Sunny</strong></td><td>OP-05</td><td><span class="badge badge-gold">Stage</span></td><td>Once per turn, when 1 of your Straw Hat Characters attacks, draw 1 card.</td></tr>
+        <tr><td><strong>Haoshoku Haki</strong></td><td>OP-09</td><td><span class="badge badge-purple">Event</span></td><td>Rest up to 3 of your opponent's Characters. Those Characters cannot be awakened until opponent's next turn.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ HOW TO PLAY ═══════════════════════ -->
+<div id="page-howtoplay" class="page">
+  <div class="section">
+    <h2 class="section-title">How to Play</h2>
+    <p class="section-sub">From unboxing your first pack to mastering tournament play — your complete guide.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:48px;">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:28px;">
+        <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:12px;">🎯 Objective</h3>
+        <p>Reduce your opponent's <strong>Life Points to zero</strong>. Each player starts with a hand of 5 cards and a Life area of 5 cards (face-down). When your Leader is attacked and loses the battle, the top Life card enters your hand. Once your Life area is empty and your Leader loses a battle — you lose.</p>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:28px;">
+        <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:12px;">🃏 Deck Rules</h3>
+        <p>A legal deck contains exactly <strong>50 cards</strong>: 1 Leader card + 49 Character/Event/Stage cards. Up to 4 copies of any card with the same card number are allowed. DON!! cards (10 total) are kept separate from your main deck.</p>
+      </div>
+    </div>
+
+    <div class="htp-steps">
+      <div class="htp-step">
+        <div class="htp-step-num">01</div>
+        <div class="htp-step-body">
+          <h3>Setup &amp; Life Phase</h3>
+          <p>Each player places their Leader card face-up in the Leader Area. Shuffle your 50-card deck and place 5 cards face-down as your Life cards. Draw 5 cards for your opening hand. Each player places all 10 DON!! cards in their DON!! Deck. Decide who goes first — the starting player cannot attack on turn 1.</p>
+        </div>
+      </div>
+      <div class="htp-step">
+        <div class="htp-step-num">02</div>
+        <div class="htp-step-body">
+          <h3>Refresh Phase</h3>
+          <p>At the start of your turn, un-rest (stand) all your rested cards including Characters and DON!! cards. Then reveal the top 1 card of your DON!! Deck and add it to your DON!! Area (this increases each turn until your 10 DON!! cards are all in play).</p>
+        </div>
+      </div>
+      <div class="htp-step">
+        <div class="htp-step-num">03</div>
+        <div class="htp-step-body">
+          <h3>Draw Phase</h3>
+          <p>Draw 1 card from the top of your deck. The starting player skips the Draw Phase on their very first turn only. If you cannot draw a card because your deck is empty, you lose the game.</p>
+        </div>
+      </div>
+      <div class="htp-step">
+        <div class="htp-step-num">04</div>
+        <div class="htp-step-body">
+          <h3>DON!! Phase &amp; Main Phase</h3>
+          <p>Attach DON!! cards from your DON!! Area to your Leader or Characters to boost their Power by <strong>+1000 per DON!!</strong> attached. During Main Phase, play Character cards by paying their cost in DON!! (rest that many DON!! cards), activate card effects, and play Event cards. Stages are placed into the field and remain until replaced.</p>
+        </div>
+      </div>
+      <div class="htp-step">
+        <div class="htp-step-num">05</div>
+        <div class="htp-step-body">
+          <h3>Attack Phase</h3>
+          <p>You may attack with your Leader and any un-rested Characters. Declare a target (opponent's Leader or a Character). Your opponent may choose to <strong>block</strong> with a Blocker Character. Both sides reveal their Power; the higher Power wins. On a tie, the attacker wins. The loser is K.O.'d (sent to trash). If the target is the Leader and the attacker wins, one of the defender's Life cards goes to their hand.</p>
+        </div>
+      </div>
+      <div class="htp-step">
+        <div class="htp-step-num">06</div>
+        <div class="htp-step-body">
+          <h3>Counter &amp; Trigger Effects</h3>
+          <p>During your opponent's attack, you may play Event cards with [Counter] from your hand — these grant your defending card +2000 or more Power. Some cards have a [Trigger] ability that activates when they enter your hand from the Life Area. Mastering counters and triggers is the hallmark of elite play.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel Decorative',cursive;color:var(--gold);margin-bottom:20px;">Card Keywords Glossary</h3>
+    <table class="data-table">
+      <thead><tr><th>Keyword</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Rush</strong></td><td>This Character can attack the turn it is played (ignores summoning sickness).</td></tr>
+        <tr><td><strong>Blocker</strong></td><td>You may rest this card to redirect an attack targeting your Leader or another Character.</td></tr>
+        <tr><td><strong>Banish</strong></td><td>When this card K.O.s a card, remove it from the game instead of sending to trash.</td></tr>
+        <tr><td><strong>Trigger</strong></td><td>An effect that resolves when this card is placed in your hand from the Life Area.</td></tr>
+        <tr><td><strong>Double Attack</strong></td><td>When this card attacks, your opponent must check 2 Life cards instead of 1.</td></tr>
+        <tr><td><strong>Activate: Main</strong></td><td>Usable only during your Main Phase by paying the listed cost.</td></tr>
+        <tr><td><strong>On Play</strong></td><td>Effect triggers immediately when this card is played onto the field.</td></tr>
+        <tr><td><strong>When Attacking</strong></td><td>Effect activates each time this card declares an attack.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ META ═══════════════════════ -->
+<div id="page-meta" class="page">
+  <div class="section">
+    <h2 class="section-title">Best Metas</h2>
+    <p class="section-sub">Current competitive tier list — updated after the May 2026 Regional Championship results.</p>
+
+    <div class="meta-tier">
+      <div class="meta-tier-label tier-s">S Tier — Dominant</div>
+      <div class="meta-grid">
+        <div class="meta-card"><h4>Red Luffy Gear 5</h4><p>OP-13 Leader. Explosive DON!! burst. Wins through overwhelming Rush chains. ~32% top-cut share.</p></div>
+        <div class="meta-card"><h4>Purple Enel Control</h4><p>OP-11 Leader. Hand disruption + life manipulation. Near-unbeatable endgame. Punishing for new players.</p></div>
+        <div class="meta-card"><h4>Green Law Swap</h4><p>OP-03 Leader. Swap engine generates insurmountable tempo. Difficult skill floor but rewarding ceiling.</p></div>
+      </div>
+    </div>
+
+    <div class="meta-tier">
+      <div class="meta-tier-label tier-a">A Tier — Strong</div>
+      <div class="meta-grid">
+        <div class="meta-card"><h4>Yellow Roger</h4><p>OP-09 Leader. Life manipulation punishes aggro. Strong mirror matchup tools.</p></div>
+        <div class="meta-card"><h4>Blue Nami Stall</h4><p>OP-08 Leader. Draw-pass loops with counter-heavy builds. Strong in Bo3.</p></div>
+        <div class="meta-card"><h4>Red Ace Burn</h4><p>OP-04 Leader. Fast clock with burn damage via Event stacking. Weak to Blockers.</p></div>
+        <div class="meta-card"><h4>Black Sakazuki</h4><p>OP-06 Leader. Removal-heavy. Strongest K.O. density in format. Slower clock.</p></div>
+      </div>
+    </div>
+
+    <div class="meta-tier">
+      <div class="meta-tier-label tier-b">B Tier — Viable</div>
+      <div class="meta-grid">
+        <div class="meta-card"><h4>Purple Katakuri</h4><p>Banned in Standard; still legal in Classic. Board-flood with DON!! acceleration.</p></div>
+        <div class="meta-card"><h4>Red/Green Yamato</h4><p>Hybrid color consistency. Mid-range toolkit covers most matchups without excelling in any.</p></div>
+        <div class="meta-card"><h4>Blue Crocodile</h4><p>Anti-meta tech. Punishes mono-Red hard. Struggles against Purple.</p></div>
+        <div class="meta-card"><h4>Yellow Sengoku</h4><p>Marine tribal synergy. Snowballs if opponent cannot remove early board.</p></div>
+      </div>
+    </div>
+
+    <div class="meta-tier">
+      <div class="meta-tier-label tier-c">C Tier — Rogue / Off-Meta</div>
+      <div class="meta-grid">
+        <div class="meta-card"><h4>Red Zoro Aggro</h4><p>All-in beatdown. No recovery. Loses to any Blocker-heavy list.</p></div>
+        <div class="meta-card"><h4>Green Usopp Combo</h4><p>Janky combo finish. Fun in casual; fragile to disruption.</p></div>
+        <div class="meta-card"><h4>Yellow Whitebeard</h4><p>10-cost mana curve. Theoretically powerful. Practically too slow in current meta.</p></div>
+      </div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:20px;">Meta Matchup Matrix</h3>
+    <table class="data-table">
+      <thead><tr><th>Deck</th><th>vs Red Luffy</th><th>vs Purple Enel</th><th>vs Green Law</th><th>vs Yellow Roger</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Red Luffy Gear 5</strong></td><td>50–50</td><td>35–65 ⚠️</td><td>60–40 ✅</td><td>55–45</td></tr>
+        <tr><td><strong>Purple Enel Control</strong></td><td>65–35 ✅</td><td>50–50</td><td>45–55</td><td>55–45</td></tr>
+        <tr><td><strong>Green Law Swap</strong></td><td>40–60 ⚠️</td><td>55–45</td><td>50–50</td><td>60–40 ✅</td></tr>
+        <tr><td><strong>Yellow Roger</strong></td><td>45–55</td><td>45–55</td><td>40–60 ⚠️</td><td>50–50</td></tr>
+        <tr><td><strong>Black Sakazuki</strong></td><td>55–45</td><td>40–60 ⚠️</td><td>50–50</td><td>50–50</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ EVENTS ═══════════════════════ -->
+<div id="page-events" class="page">
+  <div class="section">
+    <h2 class="section-title">Upcoming Events</h2>
+    <p class="section-sub">Official tournaments, regionals, and community events — find your next challenge.</p>
+
+    <div class="event-list">
+      <div class="event-item">
+        <div class="event-date"><div class="day">01</div><div class="mon">Jun</div></div>
+        <div>
+          <div class="event-title">NA East Regional Championship — New York</div>
+          <div class="event-loc">📍 Javits Convention Center, New York City, USA · Format: Standard (OP-01 ~ OP-13)</div>
+        </div>
+        <div class="event-prize">$18,000<br><span style="font-size:.75rem;color:var(--muted);">prize pool</span></div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">08</div><div class="mon">Jun</div></div>
+        <div>
+          <div class="event-title">EU Regional Championship — Paris Grand Prix</div>
+          <div class="event-loc">📍 Paris Expo Porte de Versailles, France · Format: Standard</div>
+        </div>
+        <div class="event-prize">€22,000</div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">15</div><div class="mon">Jun</div></div>
+        <div>
+          <div class="event-title">LATAM Qualifier — São Paulo Open</div>
+          <div class="event-loc">📍 São Paulo Expo, Brazil · Top 2 earn WCS 2026 invites</div>
+        </div>
+        <div class="event-prize">R$30,000</div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">22</div><div class="mon">Jun</div></div>
+        <div>
+          <div class="event-title">Japan National Championship — Tokyo</div>
+          <div class="event-loc">📍 Tokyo Big Sight, Ariake · Invitation only — 512 players</div>
+        </div>
+        <div class="event-prize">¥5,000,000</div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">05</div><div class="mon">Jul</div></div>
+        <div>
+          <div class="event-title">SEA Championship — Singapore</div>
+          <div class="event-loc">📍 Marina Bay Sands Convention Centre, Singapore</div>
+        </div>
+        <div class="event-prize">S$25,000</div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">19</div><div class="mon">Jul</div></div>
+        <div>
+          <div class="event-title">World Championship Series 2026 — Yokohama</div>
+          <div class="event-loc">📍 Pacifico Yokohama, Kanagawa, Japan · Invite-only · 256 players</div>
+        </div>
+        <div class="event-prize">$250,000</div>
+      </div>
+      <div class="event-item">
+        <div class="event-date"><div class="day">02</div><div class="mon">Aug</div></div>
+        <div>
+          <div class="event-title">Set 14 Launch Weekend — Global Store Championships</div>
+          <div class="event-loc">📍 Participating game stores worldwide · Promo: Haki Clash Leader alt-art</div>
+        </div>
+        <div class="event-prize">Promos</div>
+      </div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:16px;">Past Champions</h3>
+    <table class="data-table">
+      <thead><tr><th>Year</th><th>Event</th><th>Champion</th><th>Deck</th></tr></thead>
+      <tbody>
+        <tr><td>2025</td><td>World Championship Series — Osaka</td><td>Hiroshi Yamamoto 🇯🇵</td><td>Purple Enel Control</td></tr>
+        <tr><td>2025</td><td>NA Grand Prix — Chicago</td><td>Marcus Webb 🇺🇸</td><td>Red Luffy Gear 5</td></tr>
+        <tr><td>2024</td><td>World Championship Series — Berlin</td><td>Lucas Dupont 🇫🇷</td><td>Green Law Swap</td></tr>
+        <tr><td>2024</td><td>Asia Pacific Cup — Seoul</td><td>Park Jae-won 🇰🇷</td><td>Yellow Roger Mid</td></tr>
+        <tr><td>2023</td><td>World Championship Series — Las Vegas</td><td>Takeshi Mori 🇯🇵</td><td>Red Ace Burn</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ LOCATIONS ═══════════════════════ -->
+<div id="page-locations" class="page">
+  <div class="section">
+    <h2 class="section-title">Where to Play</h2>
+    <p class="section-sub">Find officially registered One Piece TCG venues near you — from weekly locals to major tournament sites.</p>
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--teal);margin-bottom:20px;font-size:1rem;letter-spacing:.08em;">🇺🇸 North America</h3>
+    <div class="loc-grid" style="margin-bottom:36px;">
+      <div class="loc-card"><h3>The Gaming Goat</h3><div class="loc-city">Chicago, IL</div><p>Weekly locals every Thursday 6 PM. Home of the Chicago Grand Prix qualifying series. 60+ seats.</p></div>
+      <div class="loc-card"><h3>Channel Fireball Games</h3><div class="loc-city">San Jose, CA</div><p>Monthly Regionals hosted Q1–Q4. Large play space, certified judges on-site.</p></div>
+      <div class="loc-card"><h3>Untapped Games</h3><div class="loc-city">New York, NY</div><p>Daily open play. Friday Night TCG events. Prize wall with alt-art promos.</p></div>
+      <div class="loc-card"><h3>Dragon's Lair Comics</h3><div class="loc-city">Austin, TX</div><p>Saturday weekly. Known for strong competitive community and draft pods.</p></div>
+    </div>
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--teal);margin-bottom:20px;font-size:1rem;letter-spacing:.08em;">🇯🇵 Japan</h3>
+    <div class="loc-grid" style="margin-bottom:36px;">
+      <div class="loc-card"><h3>Yodobashi Camera Akihabara</h3><div class="loc-city">Akihabara, Tokyo</div><p>Dedicated TCG floor with One Piece tables available daily. Singles trading area open Saturdays.</p></div>
+      <div class="loc-card"><h3>Card Kingdom Namba</h3><div class="loc-city">Osaka, Namba</div><p>Premier store series host. Weekly tournaments Tuesday and Saturday. Large single inventory.</p></div>
+      <div class="loc-card"><h3>Amenity Dream Shinjuku</h3><div class="loc-city">Shinjuku, Tokyo</div><p>Open 11 AM – 11 PM daily. High-level locals known for producing National Championship players.</p></div>
+    </div>
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--teal);margin-bottom:20px;font-size:1rem;letter-spacing:.08em;">🌍 Europe</h3>
+    <div class="loc-grid">
+      <div class="loc-card"><h3>Abandon All Hope Games</h3><div class="loc-city">London, UK</div><p>UK's largest One Piece player base. Wednesday and Sunday tournaments. Streamed matches available.</p></div>
+      <div class="loc-card"><h3>Heidelberger Spieleverlag Hub</h3><div class="loc-city">Heidelberg, Germany</div><p>Official Bandai partner store. Monthly sealed events. Large German community.</p></div>
+      <div class="loc-card"><h3>PixelGaming Paris</h3><div class="loc-city">Paris, France</div><p>Friday Night Grand Line events. Connected to EU Regional Circuit. Bilingual judges available.</p></div>
+      <div class="loc-card"><h3>Yellow Submarine Shinsaibashi</h3><div class="loc-city">Barcelona, Spain</div><p>Hosts Iberian Cup qualifiers. Active community of 200+ local players.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ RANKINGS ═══════════════════════ -->
+<div id="page-rankings" class="page">
+  <div class="section">
+    <h2 class="section-title">World Rankings</h2>
+    <p class="section-sub">Official Grand Line TCG World Ranking — updated May 15, 2026. Points accumulated across all Bandai-sanctioned Regional and National events.</p>
+
+    <div class="stat-row" style="margin-bottom:40px;">
+      <div class="stat-box"><div class="big">2,048</div><div class="lbl">Ranked Players</div></div>
+      <div class="stat-box"><div class="big">48</div><div class="lbl">Regional Events</div></div>
+      <div class="stat-box"><div class="big">¥250M</div><div class="lbl">Total Prize Awarded</div></div>
+    </div>
+
+    <div class="rank-row"><div class="rank-num gold">1</div><div class="rank-avatar" style="background:linear-gradient(135deg,#3d2a00,#6b4400);">🏆</div><div class="rank-info"><div class="rank-name">Hiroshi Yamamoto</div><div class="rank-country">🇯🇵 Japan · Main Deck: Purple Enel Control</div></div><div class="rank-score">18,450 pts</div></div>
+    <div class="rank-row"><div class="rank-num silver">2</div><div class="rank-avatar" style="background:linear-gradient(135deg,#1a2a1a,#0d3d0d);">⚔️</div><div class="rank-info"><div class="rank-name">Park Jae-won</div><div class="rank-country">🇰🇷 South Korea · Main Deck: Green Law Swap</div></div><div class="rank-score">16,320 pts</div></div>
+    <div class="rank-row"><div class="rank-num bronze">3</div><div class="rank-avatar" style="background:linear-gradient(135deg,#2a1a0d,#4a2200);">🔥</div><div class="rank-info"><div class="rank-name">Marcus Webb</div><div class="rank-country">🇺🇸 United States · Main Deck: Red Luffy Gear 5</div></div><div class="rank-score">15,800 pts</div></div>
+    <div class="rank-row"><div class="rank-num">4</div><div class="rank-avatar" style="background:linear-gradient(135deg,#1a1a2a,#0d0d3d);">🌊</div><div class="rank-info"><div class="rank-name">Lucas Dupont</div><div class="rank-country">🇫🇷 France · Main Deck: Blue Nami Stall</div></div><div class="rank-score">14,990 pts</div></div>
+    <div class="rank-row"><div class="rank-num">5</div><div class="rank-avatar" style="background:linear-gradient(135deg,#2a0d0d,#4a0000);">👑</div><div class="rank-info"><div class="rank-name">Takeshi Mori</div><div class="rank-country">🇯🇵 Japan · Main Deck: Yellow Roger Mid</div></div><div class="rank-score">14,210 pts</div></div>
+    <div class="rank-row"><div class="rank-num">6</div><div class="rank-avatar" style="background:linear-gradient(135deg,#0d2a2a,#004040);">🩺</div><div class="rank-info"><div class="rank-name">Chen Wei-Lin</div><div class="rank-country">🇹🇼 Taiwan · Main Deck: Green Law Swap</div></div><div class="rank-score">13,780 pts</div></div>
+    <div class="rank-row"><div class="rank-num">7</div><div class="rank-avatar" style="background:linear-gradient(135deg,#1a2a0d,#2a4a00);">🗡️</div><div class="rank-info"><div class="rank-name">Andrés Vega</div><div class="rank-country">🇲🇽 Mexico · Main Deck: Red Ace Burn</div></div><div class="rank-score">12,950 pts</div></div>
+    <div class="rank-row"><div class="rank-num">8</div><div class="rank-avatar" style="background:linear-gradient(135deg,#2a1a2a,#3d003d);">💜</div><div class="rank-info"><div class="rank-name">Isabelle Renard</div><div class="rank-country">🇧🇪 Belgium · Main Deck: Purple Enel Control</div></div><div class="rank-score">12,400 pts</div></div>
+    <div class="rank-row"><div class="rank-num">9</div><div class="rank-avatar" style="background:linear-gradient(135deg,#2a2a0d,#3d3d00);">⚡</div><div class="rank-info"><div class="rank-name">Riku Nakamura</div><div class="rank-country">🇯🇵 Japan · Main Deck: Black Sakazuki</div></div><div class="rank-score">11,860 pts</div></div>
+    <div class="rank-row"><div class="rank-num">10</div><div class="rank-avatar" style="background:linear-gradient(135deg,#0d1a2a,#003040);">🌏</div><div class="rank-info"><div class="rank-name">Farhan Al-Rashid</div><div class="rank-country">🇦🇪 UAE · Main Deck: Yellow Roger Mid</div></div><div class="rank-score">11,500 pts</div></div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:16px;">Top Countries by Player Count</h3>
+    <table class="data-table">
+      <thead><tr><th>Rank</th><th>Country</th><th>Registered Players</th><th>Top-16 Appearances (2026)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>🇯🇵 Japan</td><td>184,200</td><td>38</td></tr>
+        <tr><td>2</td><td>🇺🇸 United States</td><td>92,700</td><td>21</td></tr>
+        <tr><td>3</td><td>🇰🇷 South Korea</td><td>61,400</td><td>18</td></tr>
+        <tr><td>4</td><td>🇫🇷 France</td><td>38,900</td><td>12</td></tr>
+        <tr><td>5</td><td>🇧🇷 Brazil</td><td>34,200</td><td>9</td></tr>
+        <tr><td>6</td><td>🇩🇪 Germany</td><td>28,500</td><td>8</td></tr>
+        <tr><td>7</td><td>🇹🇼 Taiwan</td><td>24,100</td><td>7</td></tr>
+        <tr><td>8</td><td>🇸🇬 Singapore</td><td>18,800</td><td>6</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ODA ═══════════════════════ -->
+<div id="page-oda" class="page">
+  <!-- WHCS{M0nk3y_D_Luffy} -->
+  <div class="section">
+    <h2 class="section-title">Eiichiro Oda</h2>
+    <p class="section-sub">The visionary creator of One Piece — and the man whose world inspired an entire card game universe.</p>
+
+    <div class="oda-hero">
+      <div class="oda-portrait">🖊️</div>
+      <div class="oda-bio">
+        <h2>Eiichiro Oda</h2>
+        <div class="oda-jp">尾田 栄一郎 — Oda Eiichirō</div>
+        <p>Born January 1, 1975 in Kumamoto, Japan, Eiichiro Oda is one of the best-selling manga authors in history. He debuted in Weekly Shōnen Jump in 1997 with <em>One Piece</em>, a pirate adventure that would grow into a cultural phenomenon spanning manga, anime, film, merchandise, games, and trading cards.</p>
+        <div class="oda-stats">
+          <div class="oda-stat"><div class="val">1997</div><div class="lbl">OP Debut</div></div>
+          <div class="oda-stat"><div class="val">1,000+</div><div class="lbl">Chapters</div></div>
+          <div class="oda-stat"><div class="val">530M+</div><div class="lbl">Volumes Sold</div></div>
+          <div class="oda-stat"><div class="val">1</div><div class="lbl">Guinness Record</div></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:20px;">Biography</h3>
+    <p style="margin-bottom:16px;">Oda developed a passion for drawing at an early age, citing manga artists Akira Toriyama (<em>Dragon Ball</em>) and Mitsutoshi Shimabukuro as early inspirations. At just 17 years old, he submitted his pirate-themed one-shot <em>Wanted!</em> to the Tezuka Award, finishing in second place and catching the attention of editors at Shueisha.</p>
+    <p style="margin-bottom:16px;">He went on to assist legendary mangaka Nobuhiro Watsuki (<em>Rurouni Kenshin</em>) before launching One Piece in Weekly Shōnen Jump on July 22, 1997. The series was an immediate success, regularly topping sales charts and establishing Oda as a generational talent.</p>
+    <p style="margin-bottom:36px;">Oda is renowned for his meticulous world-building, embedding foreshadowing across decades of storytelling. He works notoriously long hours — often sleeping only three hours a night — and is deeply protective of the One Piece narrative, personally reviewing and approving major adaptations including the One Piece TCG card illustrations and set storylines.</p>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:24px;">Career Timeline</h3>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-year">1975</div><div class="timeline-text">Born in Kumamoto City, Kumamoto Prefecture, Japan.</div></div>
+      <div class="timeline-item"><div class="timeline-year">1992</div><div class="timeline-text">Submits <em>Wanted!</em> one-shot and wins runner-up in the Tezuka Award; first professional recognition at age 17.</div></div>
+      <div class="timeline-item"><div class="timeline-year">1993</div><div class="timeline-text">Begins career as an assistant to Nobuhiro Watsuki, working on <em>Rurouni Kenshin</em> for two years.</div></div>
+      <div class="timeline-item"><div class="timeline-year">1997</div><div class="timeline-text">One Piece begins serialization in Weekly Shōnen Jump on July 22. The East Blue Arc launches Monkey D. Luffy's journey.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2000</div><div class="timeline-text">One Piece becomes the #1 selling manga in Japan, a position it would hold for over two decades.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2012</div><div class="timeline-text">Sets the Guinness World Record for "the most copies published for the same comic book series by a single author."</div></div>
+      <div class="timeline-item"><div class="timeline-year">2015</div><div class="timeline-text">One Piece surpasses 300 million volumes in circulation worldwide.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2022</div><div class="timeline-text">Bandai launches the One Piece Card Game (OPCG) globally. Oda personally endorses the project and approves all card artwork depicting canonical moments.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2023</div><div class="timeline-text">Netflix live-action adaptation premieres globally to strong reception. OPCG player base doubles within six months.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2024</div><div class="timeline-text">One Piece reaches 530+ million volumes sold. The Final Saga continues weekly in Jump.</div></div>
+      <div class="timeline-item"><div class="timeline-year">2025–26</div><div class="timeline-text">OPCG Set 13 & 14 draw directly from Final Saga storylines, with Oda providing original sketches used as basis for Secret Rare illustrations.</div></div>
+    </div>
+
+    <hr class="fancy" />
+
+    <h3 style="font-family:'Cinzel',serif;color:var(--gold);margin-bottom:16px;">Oda's Influence on the Card Game</h3>
+    <p style="margin-bottom:16px;">Unlike many IP-based card games, Bandai has maintained an unusually close relationship with Oda throughout the OPCG's development. Oda and his studio review all card illustrations to ensure consistency with canon — particularly for characters whose in-universe power levels and Devil Fruit abilities inform card mechanics.</p>
+    <p style="margin-bottom:16px;">Several cards in the game feature Oda's original sketches rendered by the card art team, most notably the <strong>OP-09 Gol D. Roger Secret Rare</strong> and the <strong>OP-04 Edward Newgate (Whitebeard) Leader</strong>, both considered crown jewels of any collection.</p>
+    <p>In an interview for Jump Festa 2024, Oda expressed surprise and delight at the depth of the card game's competitive scene: <em>"I never imagined Luffy would one day be the reason people wake up at 5 AM to travel to a tournament. It moves me."</em></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <div class="footer-logo">GrandLine TCG</div>
+  <p>Fan-made community resource. One Piece and all related marks are property of Eiichiro Oda / Shueisha.</p>
+  <p style="margin-top:6px;">Card game published by Bandai Namco Holdings. This site is not affiliated with or endorsed by Bandai or Shueisha.</p>
+  <p style="margin-top:14px;font-size:.75rem;opacity:.4;">© 2026 GrandLineTCG.com · All rights reserved</p>
+</footer>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.getElementById('nav-' + id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
