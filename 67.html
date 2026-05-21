@@ -475,10 +475,9 @@
     clicks++;
     updateCounter();
 
-    // Pulse animation
     const el = document.getElementById('big67');
     el.classList.remove('pulse');
-    void el.offsetWidth; // reflow
+    void el.offsetWidth;
     el.classList.add('pulse');
 
     checkConditions();
@@ -499,15 +498,29 @@
 
   function checkConditions() {
     if (clicks >= TARGET_CLICKS && signed) {
-      revealFlag();
+      revealFlag();  // now actually defined below
     }
+  }
+
+  async function revealFlag() {
+    const flagSection = document.getElementById('flag-section');
+    const flagBox = document.getElementById('flag-box');
+
+    flagSection.style.display = 'block';
+    flagBox.className = 'loading';
+    flagBox.textContent = 'Consulting the number oracle...';
+
+    setTimeout(() => {
+      flagSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 200);
+
+    await loadFlag();
   }
 
   async function loadFlag() {
     const flagBox = document.getElementById('flag-box');
 
     try {
-      // Always get a fresh token immediately before the flag request
       const sessionRes = await fetch('https://whcsctf-api-bdu8.onrender.com/api/session');
       if (!sessionRes.ok) {
         flagBox.className = '';
@@ -517,9 +530,8 @@
 
       const sessionData = await sessionRes.json();
       const token = sessionData.token;
-      sessionStorage.setItem('whcs_token', token);
 
-      const response = await fetch('https://whcsctf-api-bdu8.onrender.com/api/6767', {
+      const response = await fetch('https://whcsctf-api-bdu8.onrender.com/api/67', {
         method: 'GET',
         headers: {
           'x-ctf-token': token
@@ -540,7 +552,7 @@
     } catch (err) {
       console.error(err);
       flagBox.className = '';
-      flagBox.textContent = 'Connection error.';
+      flagBox.textContent = 'Connection error. Check the browser console for details.';
     }
   }
 </script>
