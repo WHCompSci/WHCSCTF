@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cookie Monster Challenge</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        .container {
+            width: 500px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,255,0,0.2);
+        }
+
+        h1 {
+            color: #00ff88;
+        }
+
+        .flag {
+            margin-top: 20px;
+            color: yellow;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .hint {
+            margin-top: 15px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cookie Monster</h1>
+    <div id="content"></div>
+</div>
+
+<script>
+    // Function to get a cookie value
+    function getCookie(name) {
+        let cookies = document.cookie.split(";");
+
+        for (let cookie of cookies) {
+            let [key, value] = cookie.trim().split("=");
+
+            if (key === name) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    // Function to set cookie
+    function setCookie(name, value) {
+        document.cookie = `${name}=${value}; path=/`;
+    }
+
+    // Check if role cookie exists
+    let role = getCookie("role");
+
+    if (!role) {
+        setCookie("role", "user");
+        role = "user";
+    }
+
+    const content = document.getElementById("content");
+
+    // Admin check
+    if (role === "admin") {
+        content.innerHTML = `
+            <h2>Welcome Admin</h2>
+            <div class="flag">
+                Flag: cyber{cookies_are_not_security}
+            </div>
+        `;
+    } else {
+        content.innerHTML = `
+            <p>You are logged in as a normal user.</p>
+            <p>Admins get special access.</p>
+
+            <div class="hint">
+                Hint: Cookies can be edited...
+            </div>
+
+            <!-- Definitely secure authentication system -->
+        `;
+    }
+</script>
+
+</body>
+</html>
